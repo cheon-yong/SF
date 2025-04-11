@@ -8,6 +8,19 @@ public class SF : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+		PublicIncludePaths.AddRange(new string[] {
+			"SF"
+		});
+
+		PublicDependencyModuleNames.AddRange(new string[] { 
+			"Core", 
+			"CoreUObject", 
+			"Engine",
+			"InputCore", 
+			"EnhancedInput",
+			"OnlineSubsystem",
+			"OnlineSubsystemUtils",
+			"OnlineSubsystemNULL",
+		});
 	}
 }
