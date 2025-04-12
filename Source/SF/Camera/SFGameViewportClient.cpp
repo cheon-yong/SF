@@ -18,22 +18,77 @@ USFGameViewportClient::USFGameViewportClient(const FObjectInitializer& ObjectIni
 	SFSplitscreenInfo[ESFSplitScreenType::SeparateScreen].PlayerData.Add(FPerPlayerSplitscreenData(0.4999f, 1.0f, 0.0f, 0.0f));
 	SFSplitscreenInfo[ESFSplitScreenType::SeparateScreen].PlayerData.Add(FPerPlayerSplitscreenData(0.4999f, 1.0f, 0.5001f, 0.0f));
 
-	SplitScreenType = ESFSplitScreenType::OneScreen;
+	SplitscreenType = ESFSplitScreenType::SeparateScreen;
+
+	ElapsedTime = 0.f;
+	
+	ChangeDuration = 1.0f; // Default 1
+
+	bChangingScreenSize = false;
 }
 
 void USFGameViewportClient::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UpdateScreenInfo();
+	UpdateScreenInfo(DeltaTime);
 }
 
 void USFGameViewportClient::SetSplitScreenType(ESFSplitScreenType NewSplitScreenType)
 {
+	if (SplitscreenType == NewSplitScreenType)
+		return;
 
+	BeforeSplitscreenType = SplitscreenType;
+	SplitscreenType = NewSplitScreenType;
+	bChangingScreenSize = true;
+	ElapsedTime = 0;
 }
 
-void USFGameViewportClient::UpdateScreenInfo()
+void USFGameViewportClient::UpdateScreenInfo(float DeltaTime)
 {
+	if (bChangingScreenSize == true)
+	{
+		ElapsedTime += DeltaTime;
+		
+		float Alpha = FMath::Clamp(ElapsedTime / ChangeDuration, 0.f, 1.f); // ม๘วเทü
 
+		TArray<FPerPlayerSplitscreenData> TempData;
+		FPerPlayerSplitscreenData NewPlayer1Data = FPerPlayerSplitscreenData(
+			FMath::Lerp(SFSplitscreenInfo[BeforeSplitscreenType].PlayerData[0].SizeX, SplitscreenInfo[SplitscreenType].PlayerData[0].SizeX, Alpha),
+			FMath::Lerp(SFSplitscreenInfo[BeforeSplitscreenType].PlayerData[0].SizeY, SplitscreenInfo[SplitscreenType].PlayerData[0].SizeY, Alpha),
+			FMath::Lerp(SFSplitscreenInfo[BeforeSplitscreenType].PlayerData[0].OriginX, SplitscreenInfo[SplitscreenType].PlayerData[0].OriginX, Alpha),
+			FMath::Lerp(SFSplitscreenInfo[BeforeSplitscreenType].PlayerData[0].OriginY, SplitscreenInfo[SplitscreenType].PlayerData[0].OriginY, Alpha)
+		);
+		TempData.Add(NewPlayer1Data);
+
+		FPerPlayerSplitscreenData NewPlayer2Data = FPerPlayerSplitscreenData(
+			FMath::Lerp(SFSplitscreenInfo[BeforeSplitscreenType].PlayerData[1].SizeX, SplitscreenInfo[SplitscreenType].PlayerData[1].SizeX, Alpha),
+			FMath::Lerp(SFSplitscreenInfo[BeforeSplitscreenType].PlayerData[1].SizeY, SplitscreenInfo[SplitscreenType].PlayerData[1].SizeY, Alpha),
+			FMath::Lerp(SFSplitscreenInfo[BeforeSplitscreenType].PlayerData[1].OriginX, SplitscreenInfo[SplitscreenType].PlayerData[1].OriginX, Alpha),
+			FMath::Lerp(SFSplitscreenInfo[BeforeSplitscreenType].PlayerData[1].OriginY, SplitscreenInfo[SplitscreenType].PlayerData[1].OriginY, Alpha)
+		);
+		TempData.Add(NewPlayer2Data);
+
+		if (Alpha >= 1.0f)
+		{
+			ElapsedTime = 0.f;
+			bChangingScreenSize = false;
+		}
+
+		const TArray<ULocalPlayer*>& PlayerList = GetOuterUEngine()->GetGamePlayers(this);
+
+		for (int32 PlayerIdx = 0; PlayerIdx < PlayerList.Num(); PlayerIdx++)
+		{
+			PlayerList[PlayerIdx]->Size.X = TempData[PlayerIdx].SizeX;
+			PlayerList[PlayerIdx]->Size.Y = TempData[PlayerIdx].SizeY;
+			PlayerList[PlayerIdx]->Origin.X = TempData[PlayerIdx].OriginX;
+			PlayerList[PlayerIdx]->Origin.Y = TempData[PlayerIdx].OriginY;
+
+			PlayerList[PlayerIdx]->Size.X = 0;
+			PlayerList[PlayerIdx]->Size.Y = 0;
+			PlayerList[PlayerIdx]->Origin.X = TempData[PlayerIdx].OriginX;
+			PlayerList[PlayerIdx]->Origin.Y = TempData[PlayerIdx].OriginY;
+		}
+	}
 }

@@ -31,17 +31,23 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 	
-	UFUNCTION(BlueprintCallable)
 	void SetSplitScreenType(ESFSplitScreenType NewSplitScreenType);
 
 protected:
-	void UpdateScreenInfo();
+	void UpdateScreenInfo(float DeltaTime);
 
 protected:
 
+	float ElapsedTime;
+
+	float ChangeDuration;
+
+	bool bChangingScreenSize;
+
 	UPROPERTY()
-	TEnumAsByte<ESFSplitScreenType> SplitScreenType;
+	TEnumAsByte<ESFSplitScreenType> SplitscreenType;
+
+	TEnumAsByte<ESFSplitScreenType> BeforeSplitscreenType;
 
 	TArray<struct FSplitscreenData> SFSplitscreenInfo;
-
 };
