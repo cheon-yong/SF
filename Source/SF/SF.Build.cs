@@ -20,7 +20,7 @@ public class SF : ModuleRules
 			"EnhancedInput",
 			"OnlineSubsystem",
 			"OnlineSubsystemUtils",
-			"OnlineSubsystemNULL",
+			"OnlineSubsystemNull",
 		});
 	}
 }
