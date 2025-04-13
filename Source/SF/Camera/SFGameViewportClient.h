@@ -30,8 +30,11 @@ public:
 	USFGameViewportClient(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void LayoutPlayers() override;
 	
 	void SetSplitScreenType(ESFSplitScreenType NewSplitScreenType);
+
 
 protected:
 	void UpdateScreenInfo(float DeltaTime);
