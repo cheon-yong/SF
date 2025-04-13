@@ -2,6 +2,7 @@
 
 
 #include "Camera/SFGameViewportClient.h"
+#include <Game/SFGameInstance.h>
 
 USFGameViewportClient::USFGameViewportClient(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -98,6 +99,9 @@ void USFGameViewportClient::UpdateScreenInfo(float DeltaTime)
 
 	for (int32 PlayerIdx = 0; PlayerIdx < PlayerList.Num(); PlayerIdx++)
 	{
+		if (PlayerIdx >= 2)
+			break;
+
 		PlayerList[PlayerIdx]->Size.X = TempData[PlayerIdx].SizeX;
 		PlayerList[PlayerIdx]->Size.Y = TempData[PlayerIdx].SizeY;
 		PlayerList[PlayerIdx]->Origin.X = TempData[PlayerIdx].OriginX;

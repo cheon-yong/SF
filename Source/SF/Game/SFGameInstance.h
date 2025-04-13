@@ -17,4 +17,5 @@ class SF_API USFGameInstance : public UGameInstance
 public:
 	ULocalPlayer* CreateLocalPlayer(APlayerController* NewPlayerController, FString& OutError);
 
+
 };

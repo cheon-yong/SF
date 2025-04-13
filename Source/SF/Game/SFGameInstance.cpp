@@ -66,3 +66,4 @@ ULocalPlayer* USFGameInstance::CreateLocalPlayer(APlayerController* NewPlayerCon
 
 	return NewPlayer;
 }
+

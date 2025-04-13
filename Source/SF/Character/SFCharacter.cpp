@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include <Game/SFGameMode.h>
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -59,6 +60,13 @@ void ASFCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 }
+
+
+void ASFCharacter::OnRep_Controller()
+{
+	Super::OnRep_Controller();
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 // Input
