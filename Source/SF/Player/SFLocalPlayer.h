@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Engine/LocalPlayer.h"
 #include "SFLocalPlayer.generated.h"
 
