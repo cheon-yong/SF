@@ -14,11 +14,4 @@ class SF_API ASFPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
-protected:
-
-
-protected:
-
-	virtual void OnRep_PlayerState() override;
-	virtual void OnPossess(APawn* aPawn) override;
 };

@@ -108,3 +108,10 @@ void USFGameViewportClient::UpdateScreenInfo(float DeltaTime)
 		PlayerList[PlayerIdx]->Origin.Y = TempData[PlayerIdx].OriginY;
 	}
 }
+
+void USFGameViewportClient::Draw(FViewport* InViewport, FCanvas* SceneCanvas)
+{
+	Super::Draw(InViewport, SceneCanvas);
+
+
+}

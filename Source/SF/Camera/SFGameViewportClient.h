@@ -35,6 +35,7 @@ public:
 	
 	void SetSplitScreenType(ESFSplitScreenType NewSplitScreenType);
 
+	virtual void Draw(FViewport* Viewport, FCanvas* SceneCanvas) override;
 
 protected:
 	void UpdateScreenInfo(float DeltaTime);

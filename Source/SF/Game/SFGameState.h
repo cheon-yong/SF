@@ -14,7 +14,4 @@ class SF_API ASFGameState : public AGameState
 {
 	GENERATED_BODY()
 	
-public:
-	virtual void BeginPlay() override;
-	virtual void OnRep_MatchState() override;
 };

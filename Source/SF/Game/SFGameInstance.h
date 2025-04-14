@@ -6,6 +6,9 @@
 #include "Engine/GameInstance.h"
 #include "SFGameInstance.generated.h"
 
+class USFLocalPlayer;
+class APlayerCameraManager;
+
 /**
  * 
  */
@@ -17,5 +20,5 @@ class SF_API USFGameInstance : public UGameInstance
 public:
 	ULocalPlayer* CreateLocalPlayer(APlayerController* NewPlayerController, FString& OutError);
 
-
+	USFLocalPlayer* CreateLocalPlayer(APlayerCameraManager* PlayerCameraManager, FString& OutError);
 };
