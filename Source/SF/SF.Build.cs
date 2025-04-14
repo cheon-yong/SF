@@ -21,6 +21,8 @@ public class SF : ModuleRules
 			"OnlineSubsystem",
 			"OnlineSubsystemUtils",
 			"OnlineSubsystemNull",
+			"RHI", 
+			"RenderCore",
 		});
 	}
 }
