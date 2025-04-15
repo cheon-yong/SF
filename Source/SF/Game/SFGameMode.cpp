@@ -20,11 +20,15 @@ void ASFGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
+	if (NewPlayer->IsLocalController())
+		return;
+
 	if (USFGameInstance* SFGameInstance = Cast<USFGameInstance>(GetGameInstance()))
 	{
 		FString Error;
-		SFGameInstance->CreateLocalPlayer(NewPlayer->PlayerCameraManager, Error);
+		SFGameInstance->CreateLocalPlayer(NewPlayer, Error);
+		//SFGameInstance->CreateLocalPlayer(NewPlayer->PlayerCameraManager, Error);
 	}
-	//GetGameInstance()->CreateLocalPlayer(NewPlayer->GetNetConnection()->GetConnectionId(), Error, false);
+	
 }
 

@@ -3,6 +3,7 @@
 
 #include "Game/SFGameInstance.h"
 #include "Player/SFLocalPlayer.h"
+#include "Player/SFPlayerController.h"
 
 ULocalPlayer* USFGameInstance::CreateLocalPlayer(APlayerController* NewPlayerController, FString& OutError)
 {
@@ -77,6 +78,7 @@ USFLocalPlayer* USFGameInstance::CreateLocalPlayer(APlayerCameraManager* PlayerC
 	int32 InsertIndex = INDEX_NONE;
 	UGameViewportClient* GameViewport = GetGameViewportClient();
 
+
 	if (GameViewport == nullptr)
 	{
 		if (ensure(IsDedicatedServerInstance()))
@@ -98,8 +100,11 @@ USFLocalPlayer* USFGameInstance::CreateLocalPlayer(APlayerCameraManager* PlayerC
 	else if (LocalPlayers.Num() < MaxSplitscreenPlayers)
 	{
 		NewPlayer = NewObject<USFLocalPlayer>(GetEngine(), GetEngine()->LocalPlayerClass);
-
-		NewPlayer->PlayerCameraManager = PlayerCameraManager;
+		
+		ASFPlayerController* NewPlayerController = GetWorld()->SpawnActor<ASFPlayerController>();
+		NewPlayerController->PlayerCameraManager = PlayerCameraManager;
+		NewPlayer->PlayerController = NewPlayerController;
+		//NewPlayer->PlayerCameraManager = PlayerCameraManager;
 
 		InsertIndex = AddLocalPlayer(NewPlayer, UserId);
 		UWorld* CurrentWorld = GetWorld();
@@ -112,8 +117,8 @@ USFLocalPlayer* USFGameInstance::CreateLocalPlayer(APlayerCameraManager* PlayerC
 			else
 			{
 				// client; ask the server to let the new player join
-				TArray<FString> Options;
-				NewPlayer->SendSplitJoin(Options);
+				/*TArray<FString> Options;
+				NewPlayer->SendSplitJoin(Options);*/
 			}
 		}
 	}
@@ -128,5 +133,10 @@ USFLocalPlayer* USFGameInstance::CreateLocalPlayer(APlayerCameraManager* PlayerC
 	}
 
 	return NewPlayer;
+}
+
+USFLocalPlayer* USFGameInstance::CreateLocalPlayer(ASFPlayerState* PlayerState, FString& OutError)
+{
+	return nullptr;
 }
 

@@ -8,6 +8,7 @@
 
 class USFLocalPlayer;
 class APlayerCameraManager;
+class ASFPlayerState;
 
 /**
  * 
@@ -21,4 +22,6 @@ public:
 	ULocalPlayer* CreateLocalPlayer(APlayerController* NewPlayerController, FString& OutError);
 
 	USFLocalPlayer* CreateLocalPlayer(APlayerCameraManager* PlayerCameraManager, FString& OutError);
+
+	USFLocalPlayer* CreateLocalPlayer(ASFPlayerState* PlayerState, FString& OutError);
 };
