@@ -9,6 +9,7 @@
 #include "GameFramework/PlayerState.h"
 #include "Character/SFCharacter.h"
 #include "Player/SFLocalPlayer.h"
+#include "Camera/SFGameViewportClient.h"
 
 UE_DISABLE_OPTIMIZATION
 ASFPlayerController::ASFPlayerController()
@@ -63,6 +64,11 @@ void ASFPlayerController::Client_UpdateSecondController_Implementation()
 				FString::Printf(TEXT("Controller : %s"), *LC->GetPlayerController(GetWorld())->GetViewTarget()->GetName()));
 
 		}
+
+		if (USFGameViewportClient* SFGameViewportClient = Cast<USFGameViewportClient>(GameInstance->GetGameViewportClient()))
+		{
+			SFGameViewportClient->SwapCameraPosition();
+		}
 	}
 }
 UE_ENABLE_OPTIMIZATION
@@ -85,7 +91,9 @@ void ASFPlayerController::Server_DeleteSecondPawn_Implementation()
 			//PCIt->Get()->UnPossess();
 			APawn* NewPawn = PC->GetPawn();
 			PC->UnPossess();
-			GetWorld()->DestroyActor(NewPawn);
+			if (NewPawn)
+				GetWorld()->DestroyActor(NewPawn);
+
 			PC->SetViewTarget(NewViewTarget);
 			
 			Client_UpdateSecondController();

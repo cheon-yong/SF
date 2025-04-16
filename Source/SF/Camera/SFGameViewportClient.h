@@ -33,9 +33,9 @@ public:
 
 	virtual void LayoutPlayers() override;
 	
-	void SetSplitScreenType(ESFSplitScreenType NewSplitScreenType);
+	virtual void SwapCameraPosition();
 
-	virtual void Draw(FViewport* Viewport, FCanvas* SceneCanvas) override;
+	void SetSplitScreenType(ESFSplitScreenType NewSplitScreenType);
 
 protected:
 	void UpdateScreenInfo(float DeltaTime);

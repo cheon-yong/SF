@@ -44,6 +44,12 @@ void USFGameViewportClient::LayoutPlayers()
 	UpdateScreenInfo(FApp::GetDeltaTime());
 }
 
+void USFGameViewportClient::SwapCameraPosition()
+{
+	SFSplitscreenInfo[ESFSplitScreenType::SeparateScreen].PlayerData.Swap(0, 1);
+	SFSplitscreenInfo[ESFSplitScreenType::OneScreen].PlayerData.Swap(0, 1);
+}
+
 void USFGameViewportClient::SetSplitScreenType(ESFSplitScreenType NewSplitScreenType)
 {
 	if (SplitscreenType == NewSplitScreenType)
@@ -107,11 +113,4 @@ void USFGameViewportClient::UpdateScreenInfo(float DeltaTime)
 		PlayerList[PlayerIdx]->Origin.X = TempData[PlayerIdx].OriginX;
 		PlayerList[PlayerIdx]->Origin.Y = TempData[PlayerIdx].OriginY;
 	}
-}
-
-void USFGameViewportClient::Draw(FViewport* InViewport, FCanvas* SceneCanvas)
-{
-	Super::Draw(InViewport, SceneCanvas);
-
-
 }
