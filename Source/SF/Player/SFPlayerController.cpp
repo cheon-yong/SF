@@ -10,6 +10,8 @@
 #include "Character/SFCharacter.h"
 #include "Player/SFLocalPlayer.h"
 #include "Camera/SFGameViewportClient.h"
+#include <EnhancedInputSubsystems.h>
+#include <EnhancedInputComponent.h>
 
 UE_DISABLE_OPTIMIZATION
 ASFPlayerController::ASFPlayerController()
@@ -38,13 +40,99 @@ void ASFPlayerController::OnRep_PlayerState()
 	}
 }
 
-void ASFPlayerController::SetViewTarget(AActor* NewViewTarget, FViewTargetTransitionParams TransitionParams)
+void ASFPlayerController::BeginPlay()
 {
-	Super::SetViewTarget(NewViewTarget, TransitionParams);
+	Super::BeginPlay();
+}
+
+void ASFPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	// Add Input Mapping Context
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		Subsystem->AddMappingContext(DefaultMappingContext, 0);
+	}
+
+	// Set up action bindings
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent)) {
+
+		// Jumping
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ASFPlayerController::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ASFPlayerController::StopJumping);
+
+		// Moving
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASFPlayerController::Move);
+
+		// Looking
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASFPlayerController::Look);
+
+	}
+	else
+	{
+		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+	}
 
 }
 
-UE_DISABLE_OPTIMIZATION
+
+
+void ASFPlayerController::Move(const FInputActionValue& Value)
+{
+	// input is a Vector2D
+	FVector2D MovementVector = Value.Get<FVector2D>();
+
+	// find out which way is forward
+	const FRotator Rotation = GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+	// get forward vector
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+	// get right vector 
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		// add movement 
+		ControlledPawn->AddMovementInput(ForwardDirection, MovementVector.Y);
+		ControlledPawn->AddMovementInput(RightDirection, MovementVector.X);
+	}
+}
+
+void ASFPlayerController::Look(const FInputActionValue& Value)
+{
+	// input is a Vector2D
+	FVector2D LookAxisVector = Value.Get<FVector2D>();
+
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		// add yaw and pitch input to controller
+		ControlledPawn->AddControllerYawInput(LookAxisVector.X);
+		ControlledPawn->AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+
+void ASFPlayerController::Jump()
+{
+	if (ACharacter* ControlledCharacter = GetCharacter())
+	{
+		ControlledCharacter->Jump();
+	}
+}
+
+void ASFPlayerController::StopJumping()
+{
+	if (ACharacter* ControlledCharacter = GetCharacter())
+	{
+		ControlledCharacter->StopJumping();
+	}
+}
+
+
+
 void ASFPlayerController::Client_UpdateSecondController_Implementation()
 {
 	if (UGameInstance* GameInstance = GetWorld()->GetGameInstance())
@@ -71,7 +159,6 @@ void ASFPlayerController::Client_UpdateSecondController_Implementation()
 		}
 	}
 }
-UE_ENABLE_OPTIMIZATION
 
 
 void ASFPlayerController::Server_DeleteSecondPawn_Implementation()
@@ -100,4 +187,3 @@ void ASFPlayerController::Server_DeleteSecondPawn_Implementation()
 		}
 	}
 }
-UE_ENABLE_OPTIMIZATION

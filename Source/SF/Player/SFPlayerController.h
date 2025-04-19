@@ -6,6 +6,10 @@
 #include "SFPlayerController.generated.h"
 
 class USFLocalPlayer;
+class UInputMappingContext;
+class UInputAction;
+struct FInputActionValue;
+
 
 /**
  * 
@@ -20,11 +24,43 @@ public:
 
 	virtual void OnRep_PlayerState() override;
 
-	virtual void SetViewTarget(class AActor* NewViewTarget, FViewTargetTransitionParams TransitionParams = FViewTargetTransitionParams()) override;
+	virtual void BeginPlay() override;
+	virtual void SetupInputComponent() override;
 
 	UFUNCTION(Server, Reliable)
 	void Server_DeleteSecondPawn();
 
 	UFUNCTION(Client, Reliable)
 	void Client_UpdateSecondController();
+
+
+protected:
+
+	/** Called for movement input */
+	void Move(const FInputActionValue& Value);
+
+	/** Called for looking input */
+	void Look(const FInputActionValue& Value);
+
+	void Jump();
+
+	void StopJumping();
+
+public:
+
+	/** MappingContext */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputMappingContext* DefaultMappingContext;
+
+	/** Jump Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* JumpAction;
+
+	/** Move Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* MoveAction;
+
+	/** Look Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* LookAction;
 };
