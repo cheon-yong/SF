@@ -13,11 +13,13 @@
 #include <EnhancedInputSubsystems.h>
 #include <EnhancedInputComponent.h>
 
-UE_DISABLE_OPTIMIZATION
+
 ASFPlayerController::ASFPlayerController()
 {
-	
+	DefaultType = EControlType::ThirdPerson;
 }
+
+
 void ASFPlayerController::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
@@ -43,40 +45,75 @@ void ASFPlayerController::OnRep_PlayerState()
 void ASFPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
+
+}
+
+void ASFPlayerController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (CurrentInputHandler)
+	{
+		CurrentInputHandler->Tick(DeltaSeconds);
+	}
 }
 
 void ASFPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
+	TSubclassOf<USFInputHandler> InputHandlerClass = InputHandlerClassMap[DefaultType];
+	CurrentInputHandler = NewObject<USFInputHandler>(this, InputHandlerClass);
+
+	if (CurrentInputHandler == nullptr)
+	{
+		return;
+	}
+
+	BindInputHandler(CurrentInputHandler);
+
+}
+
+UE_DISABLE_OPTIMIZATION
+void ASFPlayerController::ChangeControlType(EControlType NewControlType)
+{
+	TSubclassOf<USFInputHandler> NewInputHandlerClass = InputHandlerClassMap[NewControlType];
+	if (CurrentInputHandler->StaticClass() == NewInputHandlerClass)
+	{
+		return;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue,
+		FString::Printf(TEXT("Change ControlType")));
+
+	CurrentInputHandler->RemoveInputHandler();
+
+	USFInputHandler* NewInputHandler = NewObject<USFInputHandler>(this, NewInputHandlerClass);
+	BindInputHandler(NewInputHandler);
+}
+UE_ENABLE_OPTIMIZATION
+
+
+void ASFPlayerController::BindInputHandler(USFInputHandler* InputHandler)
+{
+
 	// Add Input Mapping Context
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
-		Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		InputHandler->AddMappingContext(Subsystem);
 	}
 
 	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent)) {
-
-		// Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ASFPlayerController::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ASFPlayerController::StopJumping);
-
-		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASFPlayerController::Move);
-
-		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASFPlayerController::Look);
-
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
+	{
+		InputHandler->Bind(this, EnhancedInputComponent);
 	}
 	else
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
-
 }
-
-
 
 void ASFPlayerController::Move(const FInputActionValue& Value)
 {

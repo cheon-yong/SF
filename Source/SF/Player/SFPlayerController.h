@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Input/SFInputHandler.h"
 #include "GameFramework/PlayerController.h"
 #include "SFPlayerController.generated.h"
 
@@ -25,7 +26,11 @@ public:
 	virtual void OnRep_PlayerState() override;
 
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetupInputComponent() override;
+
+	UFUNCTION(BlueprintCallable)
+	void ChangeControlType(EControlType NewControlType);
 
 	UFUNCTION(Server, Reliable)
 	void Server_DeleteSecondPawn();
@@ -33,9 +38,12 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_UpdateSecondController();
 
-
 protected:
+	void BindInputHandler(USFInputHandler* InputHandler);
 
+public:
+
+	// Third Person
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
@@ -45,22 +53,18 @@ protected:
 	void Jump();
 
 	void StopJumping();
+	// End Third Person
+
+	// SideScroll
+
 
 public:
-
-	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputMappingContext* DefaultMappingContext;
+	TMap<EControlType, TSubclassOf<USFInputHandler>> InputHandlerClassMap;
 
-	/** Jump Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* JumpAction;
+	EControlType DefaultType;
 
-	/** Move Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* MoveAction;
-
-	/** Look Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* LookAction;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	USFInputHandler* CurrentInputHandler;
 };
