@@ -115,61 +115,6 @@ void ASFPlayerController::BindInputHandler(USFInputHandler* InputHandler)
 	}
 }
 
-void ASFPlayerController::Move(const FInputActionValue& Value)
-{
-	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
-
-	// find out which way is forward
-	const FRotator Rotation = GetControlRotation();
-	const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-	// get forward vector
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-
-	// get right vector 
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-	if (APawn* ControlledPawn = GetPawn())
-	{
-		// add movement 
-		ControlledPawn->AddMovementInput(ForwardDirection, MovementVector.Y);
-		ControlledPawn->AddMovementInput(RightDirection, MovementVector.X);
-	}
-}
-
-void ASFPlayerController::Look(const FInputActionValue& Value)
-{
-	// input is a Vector2D
-	FVector2D LookAxisVector = Value.Get<FVector2D>();
-
-	if (APawn* ControlledPawn = GetPawn())
-	{
-		// add yaw and pitch input to controller
-		ControlledPawn->AddControllerYawInput(LookAxisVector.X);
-		ControlledPawn->AddControllerPitchInput(LookAxisVector.Y);
-	}
-}
-
-
-void ASFPlayerController::Jump()
-{
-	if (ACharacter* ControlledCharacter = GetCharacter())
-	{
-		ControlledCharacter->Jump();
-	}
-}
-
-void ASFPlayerController::StopJumping()
-{
-	if (ACharacter* ControlledCharacter = GetCharacter())
-	{
-		ControlledCharacter->StopJumping();
-	}
-}
-
-
-
 void ASFPlayerController::Client_UpdateSecondController_Implementation()
 {
 	if (UGameInstance* GameInstance = GetWorld()->GetGameInstance())

@@ -2,15 +2,14 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GameFramework/GameState.h"
+#include "GameFramework/GameStateBase.h"
 #include "SFGameState.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SF_API ASFGameState : public AGameState
+class SF_API ASFGameState : public AGameStateBase
 {
 	GENERATED_BODY()
 	

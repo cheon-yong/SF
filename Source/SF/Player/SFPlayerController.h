@@ -41,22 +41,6 @@ public:
 protected:
 	void BindInputHandler(USFInputHandler* InputHandler);
 
-public:
-
-	// Third Person
-	/** Called for movement input */
-	void Move(const FInputActionValue& Value);
-
-	/** Called for looking input */
-	void Look(const FInputActionValue& Value);
-
-	void Jump();
-
-	void StopJumping();
-	// End Third Person
-
-	// SideScroll
-
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))

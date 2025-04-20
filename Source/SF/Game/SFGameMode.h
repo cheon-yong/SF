@@ -14,6 +14,8 @@ class ASFGameMode : public AGameModeBase
 public:
 	ASFGameMode();
 
+	virtual void BeginPlay() override;
+
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 };
