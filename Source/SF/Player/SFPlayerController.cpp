@@ -84,9 +84,6 @@ void ASFPlayerController::ChangeControlType(EControlType NewControlType)
 		return;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue,
-		FString::Printf(TEXT("Change ControlType")));
-
 	CurrentInputHandler->RemoveInputHandler();
 
 	USFInputHandler* NewInputHandler = NewObject<USFInputHandler>(this, NewInputHandlerClass);
@@ -97,7 +94,6 @@ UE_ENABLE_OPTIMIZATION
 
 void ASFPlayerController::BindInputHandler(USFInputHandler* InputHandler)
 {
-
 	// Add Input Mapping Context
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
@@ -129,10 +125,6 @@ void ASFPlayerController::Client_UpdateSecondController_Implementation()
 
 				PC->bAutoManageActiveCameraTarget = false;	
 			}
-
-			GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue,
-				FString::Printf(TEXT("Controller : %s"), *LC->GetPlayerController(GetWorld())->GetViewTarget()->GetName()));
-
 		}
 
 		if (USFGameViewportClient* SFGameViewportClient = Cast<USFGameViewportClient>(GameInstance->GetGameViewportClient()))
