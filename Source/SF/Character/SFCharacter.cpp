@@ -11,6 +11,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include <Game/SFGameMode.h>
+#include "Weapon/SFWeapon.h"
+#include "Weapon/SFWeaponData.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -57,12 +59,6 @@ ASFCharacter::ASFCharacter()
 	Pitch_SideScroll = 0;
 }
 
-void ASFCharacter::SetAnimationClass(UClass* AnimInstance)
-{
-	GetMesh()->SetAnimInstanceClass(AnimInstance);
-	GetMesh()->GetAnimInstance()->InitializeAnimation();
-}
-
 void ASFCharacter::BeginPlay()
 {
 	// Call the base class  
@@ -70,6 +66,61 @@ void ASFCharacter::BeginPlay()
 
 	SetColor();
 }
+
+
+void ASFCharacter::AddWeapon(TSubclassOf<USFWeaponData> WeaponDataClass)
+{
+	USFWeaponData* NewWeaponData = NewObject<USFWeaponData>(this, WeaponDataClass);
+
+	Weapons.Add(NewWeaponData);
+
+	if (CurrentWeapon == nullptr)
+	{
+		EquipWeapon(NewWeaponData);
+	}
+}
+
+void ASFCharacter::RemoveWeapon(TObjectPtr<USFWeaponData> WeaponData)
+{
+}
+
+void ASFCharacter::EquipWeapon(TObjectPtr<USFWeaponData> WeaponData)
+{
+	if (CurrentWeapon != nullptr)
+	{
+		UnequipWeapon(CurrentWeapon);
+	}
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = this;
+
+	ASFWeapon* NewWeapon = GetWorld()->SpawnActor<ASFWeapon>(WeaponData->WeaponClass, FVector::ZeroVector, FRotator(0.f, -90.f, 0.f), SpawnParams);
+	if (NewWeapon)
+	{
+		NewWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponData->SocketName);
+		CurrentWeapon = WeaponData;
+		NewWeapon->OnEquipped();
+		WeaponData->SpawnedWeapon = NewWeapon;
+		
+	}
+
+	if (WeaponData->AnimInstanceClass)
+	{
+		GetMesh()->SetAnimInstanceClass(WeaponData->AnimInstanceClass);
+	}
+}
+
+void ASFCharacter::UnequipWeapon(TObjectPtr<USFWeaponData> WeaponData)
+{
+	if (WeaponData->SpawnedWeapon)
+	{
+		WeaponData->SpawnedWeapon->OnUnequipped();
+		WeaponData->SpawnedWeapon->Destroy();
+		WeaponData->SpawnedWeapon = nullptr;
+	}
+}
+
 
 void ASFCharacter::PossessedBy(AController* NewController)
 {

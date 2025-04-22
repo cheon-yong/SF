@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "SFCharacter.generated.h"
@@ -15,6 +14,8 @@ struct FInputActionValue;
 class UMaterialInstance;
 class UAnimationAsset;
 class UAnimInstance;
+class ASFWeapon;
+class USFWeaponData;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -47,8 +48,12 @@ class ASFCharacter : public ACharacter
 public:
 	ASFCharacter();
 			
-	UFUNCTION(BlueprintCallable)
-	void SetAnimationClass(UClass* AnimInstance);
+	// Weapon
+	void AddWeapon(TSubclassOf<USFWeaponData> WeaponDataClass);
+	void RemoveWeapon(TObjectPtr<USFWeaponData> WeaponData);
+	void EquipWeapon(TObjectPtr<USFWeaponData> WeaponData);
+	void UnequipWeapon(TObjectPtr<USFWeaponData> WeaponData);
+	// ~Weapon
 
 protected:
 	// APawn interface
@@ -62,6 +67,8 @@ protected:
 	virtual void OnRep_Controller() override;
 
 	void SetColor();
+
+
 
 public:
 	/** Returns CameraBoom subobject **/
@@ -86,7 +93,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Color, meta = (AllowPrivateAccess = "true"))
 	TArray<FCharacterMaterials> CharacterColorMaterials;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+	TArray<TObjectPtr<USFWeaponData>> Weapons;
 
-	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+	TObjectPtr<USFWeaponData> CurrentWeapon;
 };
 
