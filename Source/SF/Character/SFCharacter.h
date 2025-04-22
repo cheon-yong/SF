@@ -13,6 +13,8 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 class UMaterialInstance;
+class UAnimationAsset;
+class UAnimInstance;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -45,6 +47,8 @@ class ASFCharacter : public ACharacter
 public:
 	ASFCharacter();
 			
+	UFUNCTION(BlueprintCallable)
+	void SetAnimationClass(UClass* AnimInstance);
 
 protected:
 	// APawn interface
@@ -57,14 +61,17 @@ protected:
 
 	virtual void OnRep_Controller() override;
 
-	UFUNCTION(Client, Reliable)
-	void Client_SetColor();
+	void SetColor();
 
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float Pitch_SideScroll;
 
 protected:
 
@@ -79,5 +86,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Color, meta = (AllowPrivateAccess = "true"))
 	TArray<FCharacterMaterials> CharacterColorMaterials;
 
+
+	
 };
 

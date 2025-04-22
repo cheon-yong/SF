@@ -53,6 +53,14 @@ ASFCharacter::ASFCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	Pitch_SideScroll = 0;
+}
+
+void ASFCharacter::SetAnimationClass(UClass* AnimInstance)
+{
+	GetMesh()->SetAnimInstanceClass(AnimInstance);
+	GetMesh()->GetAnimInstance()->InitializeAnimation();
 }
 
 void ASFCharacter::BeginPlay()
@@ -60,6 +68,24 @@ void ASFCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
+	SetColor();
+}
+
+void ASFCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+}
+
+
+void ASFCharacter::OnRep_Controller()
+{
+	Super::OnRep_Controller();
+
+}
+
+void ASFCharacter::SetColor()
+{
 
 	if (GetNetMode() == ENetMode::NM_ListenServer)
 	{
@@ -87,36 +113,6 @@ void ASFCharacter::BeginPlay()
 			GetMesh()->SetMaterial(1, CharacterColorMaterials[(int)ECharacterColor::Blue].Material1);
 		}
 	}
-
-	/*if (IsLocallyControlled())
-	{
-		GetMesh()->SetMaterial(0, CharacterColorMaterials[(int)ECharacterColor::Blue].Material0);
-		GetMesh()->SetMaterial(1, CharacterColorMaterials[(int)ECharacterColor::Blue].Material1);
-	}
-	else
-	{
-		GetMesh()->SetMaterial(0, CharacterColorMaterials[(int)ECharacterColor::Red].Material0);
-		GetMesh()->SetMaterial(1, CharacterColorMaterials[(int)ECharacterColor::Red].Material1);
-	}*/
-}
-
-void ASFCharacter::PossessedBy(AController* NewController)
-{
-	Super::PossessedBy(NewController);
-
-}
-
-
-void ASFCharacter::OnRep_Controller()
-{
-	Super::OnRep_Controller();
-
-}
-
-void ASFCharacter::Client_SetColor_Implementation()
-{
-	GetMesh()->SetMaterial(0, CharacterColorMaterials[(int)ECharacterColor::Red].Material0);
-	GetMesh()->SetMaterial(1, CharacterColorMaterials[(int)ECharacterColor::Red].Material1);
 }
 
 

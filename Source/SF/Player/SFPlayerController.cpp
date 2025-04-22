@@ -88,6 +88,7 @@ void ASFPlayerController::ChangeControlType(EControlType NewControlType)
 
 	USFInputHandler* NewInputHandler = NewObject<USFInputHandler>(this, NewInputHandlerClass);
 	BindInputHandler(NewInputHandler);
+	CurrentInputHandler = NewInputHandler;
 }
 UE_ENABLE_OPTIMIZATION
 

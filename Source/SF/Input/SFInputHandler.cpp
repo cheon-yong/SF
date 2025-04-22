@@ -27,7 +27,8 @@ void USFInputHandler::Bind(ASFPlayerController* PlayerController, UEnhancedInput
 
 void USFInputHandler::Unbind()
 {
-	InputComponent->ClearActionBindings();
+	if (InputComponent)
+		InputComponent->ClearActionBindings();
 
 	SFPlayerController = nullptr;
 	InputComponent = nullptr;

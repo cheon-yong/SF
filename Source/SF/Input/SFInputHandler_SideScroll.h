@@ -17,12 +17,15 @@ class SF_API USFInputHandler_SideScroll : public USFInputHandler
 	GENERATED_BODY()
 	
 public:
+	USFInputHandler_SideScroll();
 
 	virtual void Bind(ASFPlayerController* PlayerController, UEnhancedInputComponent* EnhancedInputComponent) override;
 
 	virtual void Unbind() override;
 
 	virtual void Tick(float DeltaSeconds) override;
+
+	void SetAimOffset();
 
 protected:
 
@@ -52,8 +55,12 @@ public:
 	UInputAction* ShootAction;
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input)
+	float Pitch;
+		
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, meta = (AllowPrivateAccess = "true"))
 	FRotator TargetRotationRate;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FRotator OriginRate;
 };
