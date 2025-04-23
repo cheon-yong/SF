@@ -29,5 +29,4 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Bullet)
 	FName SpawnSocketName;
-
 };

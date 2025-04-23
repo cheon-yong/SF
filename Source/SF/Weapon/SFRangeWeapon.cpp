@@ -8,12 +8,13 @@
 #include "Character/SFCharacter.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
+UE_DISABLE_OPTIMIZATION
 void ASFRangeWeapon::Attack()
 {
 	if (ProjectileClass)
 	{
-		FTransform SpawnTransform = MeshComp->GetSocketByName(SpawnSocketName)->GetSocketTransform(MeshComp);
-		
+		FVector Location = MeshComp->GetSocketLocation(SpawnSocketName);
+
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = Owner;
 		SpawnParams.Instigator = GetInstigator();
@@ -22,13 +23,14 @@ void ASFRangeWeapon::Attack()
 		FVector Direction;
 		if (ASFCharacter* SFCharacter = Cast<ASFCharacter>(Owner))
 		{
-			Direction = Owner->GetActorForwardVector().RotateAngleAxis(SFCharacter->Pitch_SideScroll, FVector(0, 1, 0));
+			float Angle = Owner->GetActorForwardVector().X < 0 ? SFCharacter->Pitch_SideScroll : SFCharacter->Pitch_SideScroll * -1;
+			Direction = Owner->GetActorForwardVector().RotateAngleAxis(Angle, FVector(0, 1, 0));
 		}
 
 		ProjectileRotation = Direction.Rotation();
 
 		GetWorld()->SpawnActor<ASFProjectile>(ProjectileClass,
-			SpawnTransform.GetLocation(),
+			Location,
 			ProjectileRotation,
 			SpawnParams
 		);
@@ -36,3 +38,4 @@ void ASFRangeWeapon::Attack()
 		OnFire.Broadcast();
 	}
 }
+UE_ENABLE_OPTIMIZATION
