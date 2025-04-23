@@ -9,6 +9,7 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include <Character/SFCharacter.h>
+#include "CollisionQueryParams.h"
 
 USFInputHandler_SideScroll::USFInputHandler_SideScroll()
 {
@@ -133,10 +134,59 @@ void USFInputHandler_SideScroll::Look(const FInputActionValue& Value)
 
 void USFInputHandler_SideScroll::Jump()
 {
+	bool bIsFalling = GetCharacter()->GetMovementComponent()->IsFalling();
+
+	
+	if (bIsFalling && WallInFront())
+	{
+		WallJump();
+		return;
+	}
+
 	if (ACharacter* ControlledCharacter = GetCharacter())
 	{
 		ControlledCharacter->Jump();
 	}
+}
+
+void USFInputHandler_SideScroll::WallJump()
+{
+	FVector Forward = GetCharacter()->GetActorForwardVector();
+	FVector LaunchDirection = -Forward; // 벽의 반대 방향
+	LaunchDirection.Z = 1.0f; // 위로도 튕기게
+
+	FVector LaunchVelocity = LaunchDirection * 600.0f; // 속도 조절
+
+	if (WallJumpMontage)
+		GetCharacter()->GetMesh()->GetAnimInstance()->Montage_Play(WallJumpMontage);
+
+	GetCharacter()->LaunchCharacter(LaunchVelocity, true, true);
+	//GetCharacter()->GetMesh()->PlayAni
+}
+
+bool USFInputHandler_SideScroll::WallInFront()
+{
+	FVector Start = GetCharacter()->GetActorLocation();
+	FVector Forward = GetCharacter()->GetActorForwardVector();
+	FVector End = Start + Forward * 60.0f; // 100cm 앞까지 검사
+
+	FHitResult Hit;
+
+	FCollisionQueryParams TraceParams(FName(TEXT("WallTrace")), true, GetCharacter());
+
+	TraceParams.bReturnPhysicalMaterial = false;
+
+	// 라인트레이스 수행
+	bool bHit = GetWorld()->LineTraceSingleByObjectType(
+		Hit,
+		Start,
+		End,
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_WorldStatic),
+		TraceParams
+	);
+
+	return bHit;
+	
 }
 
 void USFInputHandler_SideScroll::StopJumping()

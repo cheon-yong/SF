@@ -37,6 +37,10 @@ protected:
 
 	void Jump();
 
+	void WallJump();
+
+	bool WallInFront();
+
 	void StopJumping();
 
 public:
@@ -56,6 +60,9 @@ public:
 	UInputAction* ShootAction;
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Jump)
+	UAnimMontage* WallJumpMontage;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input)
 	float Pitch;
 		
