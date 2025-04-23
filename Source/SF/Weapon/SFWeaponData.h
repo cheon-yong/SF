@@ -6,6 +6,7 @@
 #include "SFWeaponData.generated.h"
 
 class ASFWeapon;
+class ASFCharacter;
 
 /**
  * 
@@ -15,6 +16,13 @@ class SF_API USFWeaponData : public UObject
 {
 	GENERATED_BODY()
 	
+public:
+	void SetOwner(AActor* InOwner);
+
+	void SetInstigator(APawn* InInstigator);
+	
+	ASFWeapon* SpawnWeapon(ASFCharacter* InOwner);
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<ASFWeapon> WeaponClass;
@@ -31,4 +39,10 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	FName SocketName;
 	
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	AActor* Owner;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	APawn* Instigator;
 };

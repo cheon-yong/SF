@@ -57,6 +57,7 @@ ASFCharacter::ASFCharacter()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
 	Pitch_SideScroll = 0;
+	ToMouseVector = FVector::Zero();
 }
 
 void ASFCharacter::BeginPlay()
@@ -72,6 +73,8 @@ void ASFCharacter::AddWeapon(TSubclassOf<USFWeaponData> WeaponDataClass)
 {
 	USFWeaponData* NewWeaponData = NewObject<USFWeaponData>(this, WeaponDataClass);
 
+	NewWeaponData->SetOwner(this);
+	NewWeaponData->SetInstigator(this);
 	Weapons.Add(NewWeaponData);
 
 	if (CurrentWeapon == nullptr)
@@ -90,21 +93,9 @@ void ASFCharacter::EquipWeapon(TObjectPtr<USFWeaponData> WeaponData)
 	{
 		UnequipWeapon(CurrentWeapon);
 	}
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.Instigator = this;
-
-	ASFWeapon* NewWeapon = GetWorld()->SpawnActor<ASFWeapon>(WeaponData->WeaponClass, FVector::ZeroVector, FRotator(0.f, -90.f, 0.f), SpawnParams);
-	if (NewWeapon)
-	{
-		NewWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponData->SocketName);
-		CurrentWeapon = WeaponData;
-		NewWeapon->OnEquipped();
-		WeaponData->SpawnedWeapon = NewWeapon;
-		
-	}
-
+	
+	WeaponData->SpawnWeapon(this);
+	CurrentWeapon = WeaponData;
 	if (WeaponData->AnimInstanceClass)
 	{
 		GetMesh()->SetAnimInstanceClass(WeaponData->AnimInstanceClass);
@@ -118,6 +109,14 @@ void ASFCharacter::UnequipWeapon(TObjectPtr<USFWeaponData> WeaponData)
 		WeaponData->SpawnedWeapon->OnUnequipped();
 		WeaponData->SpawnedWeapon->Destroy();
 		WeaponData->SpawnedWeapon = nullptr;
+	}
+}
+
+void ASFCharacter::UseWeapon()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->SpawnedWeapon->Attack();
 	}
 }
 

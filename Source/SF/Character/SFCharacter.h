@@ -48,11 +48,15 @@ class ASFCharacter : public ACharacter
 public:
 	ASFCharacter();
 			
+	
+
 	// Weapon
 	void AddWeapon(TSubclassOf<USFWeaponData> WeaponDataClass);
 	void RemoveWeapon(TObjectPtr<USFWeaponData> WeaponData);
 	void EquipWeapon(TObjectPtr<USFWeaponData> WeaponData);
 	void UnequipWeapon(TObjectPtr<USFWeaponData> WeaponData);
+
+	virtual void UseWeapon();
 	// ~Weapon
 
 protected:
@@ -79,6 +83,9 @@ public:
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float Pitch_SideScroll;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FVector ToMouseVector;
 
 protected:
 

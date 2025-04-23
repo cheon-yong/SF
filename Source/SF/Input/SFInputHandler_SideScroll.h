@@ -28,6 +28,7 @@ public:
 	void SetAimOffset();
 
 protected:
+	void Shoot();
 
 	void Move(const FInputActionValue& Value);
 

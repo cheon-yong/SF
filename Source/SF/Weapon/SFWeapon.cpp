@@ -11,7 +11,7 @@ ASFWeapon::ASFWeapon()
 	RootComponent = MeshComp;
 }
 
-void ASFWeapon::Shoot()
+void ASFWeapon::Attack()
 {
 }
 

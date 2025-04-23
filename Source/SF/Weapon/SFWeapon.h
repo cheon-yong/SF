@@ -13,7 +13,7 @@ class SF_API ASFWeapon : public AActor
 public:	
 	ASFWeapon();
 
-	virtual void Shoot();
+	virtual void Attack();
 
 	virtual void OnEquipped();
 	
@@ -24,7 +24,7 @@ protected:
 	virtual void BeginPlay() override;
 
 
-public:
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	TObjectPtr<USkeletalMeshComponent> MeshComp;
 };

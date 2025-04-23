@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "GameFramework/Character.h"
+#include "Input/SFInputHandler_SideScroll.h"
+
+#include "Character/SFCharacter.h"
 #include "Player/SFPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
-#include "Input/SFInputHandler_SideScroll.h"
 #include <Character/SFCharacter.h>
 
 USFInputHandler_SideScroll::USFInputHandler_SideScroll()
@@ -22,12 +22,18 @@ void USFInputHandler_SideScroll::Bind(ASFPlayerController* PlayerController, UEn
 	// Jumping
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ThisClass::Jump);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ThisClass::StopJumping);
+	
 
 	// Moving
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Move);
 
 	// Looking
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::Look);
+
+	// Shoot 
+	EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &ThisClass::Shoot);
+
+
 
 	OriginRate = GetCharacter()->GetCharacterMovement()->RotationRate;
 
@@ -67,6 +73,8 @@ void USFInputHandler_SideScroll::SetAimOffset()
 	ToMouse.X = MouseWorldPos.X - CharacterLocation.X;
 	ToMouse.Y = MouseWorldPos.Z - CharacterLocation.Z; // 횡스크롤에서는 Z축이 화면 위쪽인 경우
 
+	FVector ToMouseVector = FVector(ToMouse.X, CharacterLocation.Y, ToMouse.Y);
+
 	FVector ForwardVector = Character->GetActorForwardVector();
 	FVector2D Forward = FVector2D(ForwardVector.X, ForwardVector.Z);
 
@@ -89,10 +97,19 @@ void USFInputHandler_SideScroll::SetAimOffset()
 	if (ASFCharacter* SFCharacter = Cast<ASFCharacter>(Character))
 	{
 		SFCharacter->Pitch_SideScroll = Pitch;
+		SFCharacter->ToMouseVector = ToMouseVector;
 	}
 
 	// 예: 로그 출력
 	//UE_LOG(LogTemp, Log, TEXT("Aim Angle: %.2f degrees"), AngleDeg);
+}
+
+void USFInputHandler_SideScroll::Shoot()
+{
+	if (ASFCharacter* SFCharacter = Cast<ASFCharacter>(GetCharacter()))
+	{
+		SFCharacter->UseWeapon();
+	}
 }
 
 void USFInputHandler_SideScroll::Move(const FInputActionValue& Value)
