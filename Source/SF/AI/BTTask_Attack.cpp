@@ -25,15 +25,15 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 		return EBTNodeResult::Failed;
 	}
 
-	//FAICharacterAttackFinished OnAttackFinished;
-	//OnAttackFinished.BindLambda(
-	//	[&]()
-	//	{
-	//		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-	//	}
-	//);
+	FAICharacterAttackFinished OnAttackFinished;
+	OnAttackFinished.BindLambda(
+		[&]()
+		{
+			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		}
+	);
 
-	//AIPawn->SetAIAttackDelegate(OnAttackFinished);
-	//AIPawn->AttackByAI();
+	NPC->SetAIAttackDelegate(OnAttackFinished);
+	NPC->AttackByAI();
 	return EBTNodeResult::InProgress;
 }
