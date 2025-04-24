@@ -166,9 +166,10 @@ void USFInputHandler_SideScroll::WallJump()
 
 bool USFInputHandler_SideScroll::WallInFront()
 {
-	FVector Start = GetCharacter()->GetActorLocation();
-	FVector Forward = GetCharacter()->GetActorForwardVector();
-	FVector End = Start + Forward * 60.0f; // 100cm 앞까지 검사
+	// Mesh의 발을 기준으로 점프 가능을 판단하기 위해서 Mesh를 기준으로 Trace
+	FVector Start = GetCharacter()->GetMesh()->GetComponentLocation();
+	FVector Forward = GetCharacter()->GetMesh()->GetRightVector(); // 현재 Mesh가 회전되어있기 때문에 RightVector 사용
+	FVector End = Start + Forward * 60.0f; // 60cm 앞까지 검사
 
 	FHitResult Hit;
 

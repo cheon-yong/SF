@@ -18,9 +18,16 @@ public class SF : ModuleRules
 			"Engine",
 			"InputCore", 
 			"EnhancedInput",
+
+			"NavigationSystem", 
+
+			// OnlineSystem
 			"OnlineSubsystem",
 			"OnlineSubsystemUtils",
 			"OnlineSubsystemNull",
+
+			// AI
+			"AIModule",
 		});
 	}
 }
