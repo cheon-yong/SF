@@ -16,8 +16,13 @@ class UAnimationAsset;
 class UAnimInstance;
 class ASFWeapon;
 class USFWeaponData;
+class USFUserWidget;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHpChanged, const uint8&, MaxHp, const uint8&, CurrentHp);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHpZero);
+
 
 UENUM(BlueprintType)
 enum class ECharacterColor : uint8
@@ -48,8 +53,6 @@ class ASFCharacter : public ACharacter
 public:
 	ASFCharacter();
 			
-	
-
 	// Weapon
 	void AddWeapon(TSubclassOf<USFWeaponData> WeaponDataClass);
 	void RemoveWeapon(TObjectPtr<USFWeaponData> WeaponData);
@@ -59,46 +62,25 @@ public:
 	virtual void UseWeapon();
 	// ~Weapon
 
+	virtual void OnDamage(uint8 Damage, AActor* instigator);
+
+	virtual void SetupCharacterWidget(USFUserWidget* InUserWidget);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnHpChanged OnHpChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnHpZero OnHpZero;
+
 protected:
-	// APawn interface
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
-	// To add mapping context
 	virtual void BeginPlay() override;
 
-	virtual void PossessedBy(AController* NewController) override;
-
-	virtual void OnRep_Controller() override;
-
-	void SetColor();
-
-
-
-public:
-	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
-public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	float Pitch_SideScroll;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FVector ToMouseVector;
-
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	uint8 MaxHp = 20;
 
-	/** Camera boom positioning the camera behind the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	USpringArmComponent* CameraBoom;
-
-	/** Follow camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* FollowCamera;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Color, meta = (AllowPrivateAccess = "true"))
-	TArray<FCharacterMaterials> CharacterColorMaterials;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	uint8 CurrentHp = 20;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	TArray<TObjectPtr<USFWeaponData>> Weapons;

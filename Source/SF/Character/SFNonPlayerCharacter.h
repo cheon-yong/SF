@@ -2,17 +2,19 @@
 
 #pragma once
 
-#include "GameFramework/Character.h"
+#include "Character/SFCharacter.h"
 #include "SFNonPlayerCharacter.generated.h"
 
 class UAnimMontage;
 class ASFProjectile;
+class UWidgetComponent;
+class USFUserWidget;
 
 
 DECLARE_DELEGATE(FAICharacterAttackFinished);
 
 UCLASS()
-class SF_API ASFNonPlayerCharacter : public ACharacter
+class SF_API ASFNonPlayerCharacter : public ASFCharacter
 {
 	GENERATED_BODY()
 
@@ -30,6 +32,7 @@ public:
 	virtual void AttackByAI();
 	virtual void CreateProjectile();
 
+	virtual void OnDamage(uint8 Damage, AActor* InInstigator) override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -44,10 +47,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebug = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	UPROPERTY(VisibleAnywhere	, BlueprintReadWrite, Category = "Attack")
 	TObjectPtr<APawn> Target;
 
 protected: 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<USFUserWidget> HpBarClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UWidgetComponent> HpBar;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	UAnimMontage* AttackMontage = nullptr;
 
@@ -68,4 +77,5 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	float DetectRadius = 200.f;
+
 };

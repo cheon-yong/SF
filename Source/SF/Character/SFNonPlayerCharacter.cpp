@@ -3,10 +3,25 @@
 
 #include "Character/SFNonPlayerCharacter.h"
 #include "Weapon/SFProjectile.h"
+#include "Widget/SFWidgetComponent.h"
+#include "Widget/SFUserWidget.h"
+#include "Components/SphereComponent.h"
 
 // Sets default values
 ASFNonPlayerCharacter::ASFNonPlayerCharacter()
+	: Super()
 {
+	HpBar = CreateDefaultSubobject<USFWidgetComponent>(TEXT("Widget"));
+	HpBar->SetupAttachment(GetMesh());
+	HpBar->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
+
+	if (HpBarClass)
+	{
+		HpBar->SetWidgetClass(HpBarClass);
+		HpBar->SetWidgetSpace(EWidgetSpace::Screen);
+		HpBar->SetDrawSize(FVector2D(500.0f, 500.0f));
+		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -78,10 +93,17 @@ void ASFNonPlayerCharacter::CreateProjectile()
 
 		ProjectileRotation = Direction.Rotation();
 
-		GetWorld()->SpawnActor<ASFProjectile>(ProjectileClass,
+		ASFProjectile* Projectile = GetWorld()->SpawnActor<ASFProjectile>(ProjectileClass,
 			Location,
 			ProjectileRotation,
 			SpawnParams
 		);
+
+		Projectile->GetCollisionComp()->IgnoreActorWhenMoving(this, true);
 	}
+}
+
+void ASFNonPlayerCharacter::OnDamage(uint8 Damage, AActor* InInstigator)
+{
+	Super::OnDamage(Damage, InInstigator);
 }

@@ -2,17 +2,13 @@
 
 #include "SFCharacter.h"
 #include "Engine/LocalPlayer.h"
-#include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/Controller.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "InputActionValue.h"
 #include <Game/SFGameMode.h>
 #include "Weapon/SFWeapon.h"
 #include "Weapon/SFWeaponData.h"
+#include "Widget/HpBar.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -42,22 +38,7 @@ ASFCharacter::ASFCharacter()
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 
-	// Create a camera boom (pulls in towards the player if there is a collision)
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
-	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
-
-	// Create a follow camera
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
-
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
-	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
-
-	Pitch_SideScroll = 0;
-	ToMouseVector = FVector::Zero();
+	
 }
 
 void ASFCharacter::BeginPlay()
@@ -65,7 +46,6 @@ void ASFCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
-	SetColor();
 }
 
 
@@ -120,56 +100,28 @@ void ASFCharacter::UseWeapon()
 	}
 }
 
-
-void ASFCharacter::PossessedBy(AController* NewController)
+void ASFCharacter::OnDamage(uint8 Damage, AActor* instigator)
 {
-	Super::PossessedBy(NewController);
+	uint8 BeforeHP = CurrentHp;
+	CurrentHp = FMath::Clamp(BeforeHP - Damage, 0, MaxHp);
 
-}
+	if (BeforeHP == CurrentHp)
+		return;
 
+	OnHpChanged.Broadcast(MaxHp, CurrentHp);
 
-void ASFCharacter::OnRep_Controller()
-{
-	Super::OnRep_Controller();
-
-}
-
-void ASFCharacter::SetColor()
-{
-
-	if (GetNetMode() == ENetMode::NM_ListenServer)
+	if (CurrentHp == 0)
 	{
-		if (IsLocallyControlled())
-		{
-			GetMesh()->SetMaterial(0, CharacterColorMaterials[(int)ECharacterColor::Blue].Material0);
-			GetMesh()->SetMaterial(1, CharacterColorMaterials[(int)ECharacterColor::Blue].Material1);
-		}
-		else
-		{
-			GetMesh()->SetMaterial(0, CharacterColorMaterials[(int)ECharacterColor::Red].Material0);
-			GetMesh()->SetMaterial(1, CharacterColorMaterials[(int)ECharacterColor::Red].Material1);
-		}
-	}
-	else
-	{
-		if (IsLocallyControlled())
-		{
-			GetMesh()->SetMaterial(0, CharacterColorMaterials[(int)ECharacterColor::Red].Material0);
-			GetMesh()->SetMaterial(1, CharacterColorMaterials[(int)ECharacterColor::Red].Material1);
-		}
-		else
-		{
-			GetMesh()->SetMaterial(0, CharacterColorMaterials[(int)ECharacterColor::Blue].Material0);
-			GetMesh()->SetMaterial(1, CharacterColorMaterials[(int)ECharacterColor::Blue].Material1);
-		}
+		OnHpZero.Broadcast();
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-// Input
-
-void ASFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ASFCharacter::SetupCharacterWidget(USFUserWidget* InUserWidget)
 {
-	
+	UHpBar* HpBarWidget = Cast<UHpBar>(InUserWidget);
+	if (HpBarWidget)
+	{
+		HpBarWidget->UpdateHp(CurrentHp, MaxHp);
+		OnHpChanged.AddDynamic(HpBarWidget, &UHpBar::UpdateHp);
+	}
 }
