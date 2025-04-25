@@ -3,7 +3,7 @@
 
 #include "Input/SFInputHandler_SideScroll.h"
 
-#include "Character/SFCharacter.h"
+#include "Character/SFPlayerCharacter.h"
 #include "Player/SFPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
@@ -95,7 +95,7 @@ void USFInputHandler_SideScroll::SetAimOffset()
 	PitchDeg = FMath::Clamp(PitchDeg, -90.f, 90.f);
 
 	Pitch = PitchDeg;
-	if (ASFCharacter* SFCharacter = Cast<ASFCharacter>(Character))
+	if (ASFPlayerCharacter* SFCharacter = Cast<ASFPlayerCharacter>(Character))
 	{
 		SFCharacter->Pitch_SideScroll = Pitch;
 		SFCharacter->ToMouseVector = ToMouseVector;

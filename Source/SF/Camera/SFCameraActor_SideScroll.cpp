@@ -4,7 +4,7 @@
 #include "Camera/SFCameraActor_SideScroll.h"
 #include "Camera/CameraComponent.h"
 
-#include "Character/SFCharacter.h"
+#include "Character/SFPlayerCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/Character.h"
 
@@ -35,9 +35,9 @@ void ASFCameraActor_SideScroll::SetActive(bool Active)
 
 void ASFCameraActor_SideScroll::GetPlayers()
 {
-	for (TActorIterator<ASFCharacter> It(GetWorld()); It; ++It)
+	for (TActorIterator<ASFPlayerCharacter> It(GetWorld()); It; ++It)
 	{
-		ASFCharacter* FoundActor = *It;
+		ASFPlayerCharacter* FoundActor = *It;
 		if (FoundActor)
 		{
 			Players.AddUnique(FoundActor);
