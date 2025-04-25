@@ -38,6 +38,9 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_UpdateSecondController();
 
+	UFUNCTION(Client, Reliable, BlueprintCallable)
+	void Client_ShowMouseCurser(bool bShow);
+
 protected:
 	void BindInputHandler(USFInputHandler* InputHandler);
 

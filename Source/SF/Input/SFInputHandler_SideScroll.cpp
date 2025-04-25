@@ -60,7 +60,15 @@ void USFInputHandler_SideScroll::SetAimOffset()
 	// Get Mouse Location in world
 	FVector2D MousePosition;
 	FVector WorldLocation, WorldDirection;
-	SFPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y);
+
+	if (SFPlayerController == nullptr)
+	{
+		return;
+	}
+	bool bFindMouse = SFPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y);
+	if (!bFindMouse)
+		return;
+
 	SFPlayerController->DeprojectScreenPositionToWorld(MousePosition.X, MousePosition.Y, WorldLocation, WorldDirection);
 
 	// Get Direct Vector

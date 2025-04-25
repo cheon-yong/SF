@@ -9,13 +9,65 @@
 #include "Weapon/SFWeapon.h"
 #include "Weapon/SFWeaponData.h"
 #include "Widget/HpBar.h"
+#include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
+
+//////////////////////////////////////////////////////////////////////////
+// FInventory
+
+void FInventory::PreReplicatedRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize)
+{
+	for (int32 Index : RemovedIndices)
+	{
+		const FInventoryEntry& Entry = Entries[Index];
+		if (Entry.Instance != nullptr)
+		{
+			if (Entry.Instance->SpawnedWeapon)
+				Entry.Instance->SpawnedWeapon->OnUnequipped();
+
+			Entry.Instance->SpawnedWeapon = nullptr;
+		}
+	}
+}
+
+void FInventory::PostReplicatedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize)
+{
+}
+
+void FInventory::PostReplicatedChange(const TArrayView<int32> ChangedIndices, int32 FinalSize)
+{
+}
+
+USFWeaponData* FInventory::AddEnty(TSubclassOf<USFWeaponData> InWeaponDataClass)
+{
+	USFWeaponData* Result = nullptr;
+
+	check(InWeaponDataClass != nullptr);
+	check(Owner);
+	check(Owner->HasAuthority());
+
+	FInventoryEntry& NewEntry = Entries.AddDefaulted_GetRef();
+	NewEntry.WeaponDataClass = InWeaponDataClass;
+	NewEntry.Instance = NewObject<USFWeaponData>(Owner, InWeaponDataClass);
+	Result = NewEntry.Instance;
+
+	MarkItemDirty(NewEntry);
+
+	return Result;
+}
+
+void FInventory::RemoveEntry(USFWeaponData* InInstance)
+{
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 // ASFCharacter
 
 ASFCharacter::ASFCharacter()
+	: Super()
+	, Inventory(this)
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -37,8 +89,6 @@ ASFCharacter::ASFCharacter()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
-
-	
 }
 
 void ASFCharacter::BeginPlay()
@@ -49,18 +99,21 @@ void ASFCharacter::BeginPlay()
 	OnHpZero.AddDynamic(this, &ThisClass::OnDeath);
 }
 
+void ASFCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, Inventory);
+}
+
 
 void ASFCharacter::AddWeapon(TSubclassOf<USFWeaponData> WeaponDataClass)
 {
-	USFWeaponData* NewWeaponData = NewObject<USFWeaponData>(this, WeaponDataClass);
-
-	NewWeaponData->SetOwner(this);
-	NewWeaponData->SetInstigator(this);
-	Weapons.Add(NewWeaponData);
+	Inventory.AddEnty(WeaponDataClass);
 
 	if (CurrentWeapon == nullptr)
 	{
-		EquipWeapon(NewWeaponData);
+		EquipWeapon(0);
 	}
 }
 
@@ -68,34 +121,45 @@ void ASFCharacter::RemoveWeapon(TObjectPtr<USFWeaponData> WeaponData)
 {
 }
 
-void ASFCharacter::EquipWeapon(TObjectPtr<USFWeaponData> WeaponData)
+void ASFCharacter::EquipWeapon(int32 Index)
 {
-	if (CurrentWeapon != nullptr)
+	if (HasAuthority())
 	{
-		UnequipWeapon(CurrentWeapon);
-	}
-	
-	WeaponData->SpawnWeapon(this);
-	CurrentWeapon = WeaponData;
-	if (WeaponData->AnimInstanceClass)
-	{
-		GetMesh()->SetAnimInstanceClass(WeaponData->AnimInstanceClass);
+		if(CurrentWeapon != nullptr)
+		{
+			UnequipWeapon();
+		}
+
+		CurrentWeapon = Inventory.Entries[Index].Instance;
+		SpawnWeapon();
 	}
 }
 
-void ASFCharacter::UnequipWeapon(TObjectPtr<USFWeaponData> WeaponData)
+void ASFCharacter::SpawnWeapon()
 {
-	if (WeaponData->SpawnedWeapon)
+	CurrentWeapon->SpawnWeapon(this);
+	if (CurrentWeapon->AnimInstanceClass)
 	{
-		WeaponData->SpawnedWeapon->OnUnequipped();
-		WeaponData->SpawnedWeapon->Destroy();
-		WeaponData->SpawnedWeapon = nullptr;
+		GetMesh()->SetAnimInstanceClass(CurrentWeapon->AnimInstanceClass);
 	}
+}
+
+void ASFCharacter::UnequipWeapon()
+{
+	//Inventory.UnequipWeapon(Index);
+	if (CurrentWeapon->SpawnedWeapon)
+	{
+		CurrentWeapon->SpawnedWeapon->OnUnequipped();
+		CurrentWeapon->SpawnedWeapon->Destroy();
+		CurrentWeapon->SpawnedWeapon = nullptr;
+	}
+
+	CurrentWeapon = nullptr;
 }
 
 void ASFCharacter::UseWeapon()
 {
-	if (CurrentWeapon)
+	if (CurrentWeapon != nullptr)
 	{
 		CurrentWeapon->SpawnedWeapon->Attack();
 	}
@@ -122,6 +186,17 @@ void ASFCharacter::OnDeath()
 	Destroy();
 }
 
+void ASFCharacter::OnRep_Weapons()
+{
+	SpawnWeapon();
+}
+
+void ASFCharacter::OnRep_WeaponIndex()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue,
+		FString::Printf(TEXT("OnRep_WeaponIndex")));
+}
+
 
 void ASFCharacter::SetupCharacterWidget(USFUserWidget* InUserWidget)
 {
@@ -132,3 +207,4 @@ void ASFCharacter::SetupCharacterWidget(USFUserWidget* InUserWidget)
 		OnHpChanged.AddDynamic(HpBarWidget, &UHpBar::UpdateHp);
 	}
 }
+

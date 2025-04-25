@@ -20,6 +20,8 @@ public class SF : ModuleRules
 			"EnhancedInput",
 			"UMG",
 
+			"NetCore",
+
 			"NavigationSystem", 
 
 

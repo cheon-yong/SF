@@ -75,7 +75,6 @@ void ASFPlayerController::SetupInputComponent()
 
 }
 
-UE_DISABLE_OPTIMIZATION
 void ASFPlayerController::ChangeControlType(EControlType NewControlType)
 {
 	TSubclassOf<USFInputHandler> NewInputHandlerClass = InputHandlerClassMap[NewControlType];
@@ -84,14 +83,20 @@ void ASFPlayerController::ChangeControlType(EControlType NewControlType)
 		return;
 	}
 
-	CurrentInputHandler->RemoveInputHandler();
-
+	if (CurrentInputHandler)
+	{
+		CurrentInputHandler->RemoveInputHandler();
+	}
 	USFInputHandler* NewInputHandler = NewObject<USFInputHandler>(this, NewInputHandlerClass);
 	BindInputHandler(NewInputHandler);
 	CurrentInputHandler = NewInputHandler;
 }
-UE_ENABLE_OPTIMIZATION
 
+
+void ASFPlayerController::Client_ShowMouseCurser_Implementation(bool bShow)
+{
+	SetShowMouseCursor(bShow);
+}
 
 void ASFPlayerController::BindInputHandler(USFInputHandler* InputHandler)
 {
