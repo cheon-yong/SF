@@ -18,8 +18,10 @@ public class SF : ModuleRules
 			"Engine",
 			"InputCore", 
 			"EnhancedInput",
+			"UMG",
 
 			"NavigationSystem", 
+
 
 			// OnlineSystem
 			"OnlineSubsystem",

@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "SFProjectile.generated.h"
 
@@ -27,9 +26,14 @@ public:
 	/** Returns ProjectileMovement subobject **/
 	UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 Damage = 0;
+
 protected:
+	
 	/** Sphere collision component */
-	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile, meta = (AllowPrivateAccess = "true"))
 	USphereComponent* CollisionComp;
 
 	/** Projectile movement component */

@@ -5,7 +5,7 @@
 #include "Weapon/SFProjectile.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
-#include "Character/SFCharacter.h"
+#include "Character/SFPlayerCharacter.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 UE_DISABLE_OPTIMIZATION
@@ -21,7 +21,9 @@ void ASFRangeWeapon::Attack()
 		
 		FRotator ProjectileRotation;
 		FVector Direction;
-		if (ASFCharacter* SFCharacter = Cast<ASFCharacter>(Owner))
+
+		// TODO : 변경할 것
+		if (ASFPlayerCharacter* SFCharacter = Cast<ASFPlayerCharacter>(Owner))
 		{
 			float Angle = Owner->GetActorForwardVector().X < 0 ? SFCharacter->Pitch_SideScroll : SFCharacter->Pitch_SideScroll * -1;
 			Direction = Owner->GetActorForwardVector().RotateAngleAxis(Angle, FVector(0, 1, 0));
@@ -29,11 +31,13 @@ void ASFRangeWeapon::Attack()
 
 		ProjectileRotation = Direction.Rotation();
 
-		GetWorld()->SpawnActor<ASFProjectile>(ProjectileClass,
+		ASFProjectile* Projectile = GetWorld()->SpawnActor<ASFProjectile>(ProjectileClass,
 			Location,
 			ProjectileRotation,
 			SpawnParams
 		);
+
+		Projectile->Damage = 1;
 
 		OnFire.Broadcast();
 	}
