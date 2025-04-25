@@ -46,6 +46,7 @@ void ASFCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
+	OnHpZero.AddDynamic(this, &ThisClass::OnDeath);
 }
 
 
@@ -115,6 +116,12 @@ void ASFCharacter::OnDamage(uint8 Damage, AActor* instigator)
 		OnHpZero.Broadcast();
 	}
 }
+
+void ASFCharacter::OnDeath()
+{
+	Destroy();
+}
+
 
 void ASFCharacter::SetupCharacterWidget(USFUserWidget* InUserWidget)
 {

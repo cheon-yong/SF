@@ -6,6 +6,8 @@
 #include "Widget/SFWidgetComponent.h"
 #include "Widget/SFUserWidget.h"
 #include "Components/SphereComponent.h"
+#include <AIController.h>
+#include <BehaviorTree/BehaviorTreeComponent.h>
 
 // Sets default values
 ASFNonPlayerCharacter::ASFNonPlayerCharacter()
@@ -106,4 +108,29 @@ void ASFNonPlayerCharacter::CreateProjectile()
 void ASFNonPlayerCharacter::OnDamage(uint8 Damage, AActor* InInstigator)
 {
 	Super::OnDamage(Damage, InInstigator);
+}
+
+void ASFNonPlayerCharacter::OnDeath()
+{// Stop BT
+	if (AAIController* AIController = Cast<AAIController>(GetController()))
+	{
+		if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(AIController->BrainComponent))
+		{
+			BTComp->StopTree();
+		}
+	}
+
+	if (DeathEffectClass)
+	{
+		FActorSpawnParameters SpawnParams;
+		AActor* DeathEffect = GetWorld()->SpawnActor<AActor>(DeathEffectClass,
+			GetMesh()->GetComponentLocation(),
+			GetActorRotation(),
+			SpawnParams
+		);
+
+		DeathEffect->SetLifeSpan(0.8f);
+	}
+
+	Super::OnDeath();
 }

@@ -33,6 +33,7 @@ public:
 	virtual void CreateProjectile();
 
 	virtual void OnDamage(uint8 Damage, AActor* InInstigator) override;
+	virtual void OnDeath() override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -51,6 +52,10 @@ public:
 	TObjectPtr<APawn> Target;
 
 protected: 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Death", Meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AActor> DeathEffectClass;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<USFUserWidget> HpBarClass;
 

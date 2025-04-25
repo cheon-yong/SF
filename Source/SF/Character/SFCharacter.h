@@ -64,6 +64,9 @@ public:
 
 	virtual void OnDamage(uint8 Damage, AActor* instigator);
 
+	UFUNCTION()
+	virtual void OnDeath();
+
 	virtual void SetupCharacterWidget(USFUserWidget* InUserWidget);
 
 	UPROPERTY(BlueprintAssignable)
