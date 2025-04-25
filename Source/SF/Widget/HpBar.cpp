@@ -32,6 +32,6 @@ void UHpBar::UpdateHp(const uint8& InCurrentHp, const uint8& InMaxHp)
 
 	if (HpProgressBar)
 	{
-		HpProgressBar->SetPercent(CurrentHp / MaxHp);
+		HpProgressBar->SetPercent((float)CurrentHp / MaxHp);
 	}
 }

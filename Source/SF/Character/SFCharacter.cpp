@@ -108,7 +108,7 @@ void ASFCharacter::OnDamage(uint8 Damage, AActor* instigator)
 	if (BeforeHP == CurrentHp)
 		return;
 
-	OnHpChanged.Broadcast(MaxHp, CurrentHp);
+	OnHpChanged.Broadcast(CurrentHp, MaxHp);
 
 	if (CurrentHp == 0)
 	{
