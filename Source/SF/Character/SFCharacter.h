@@ -59,7 +59,7 @@ public:
 	UPROPERTY()
 	TSubclassOf<USFWeaponData> WeaponDataClass;
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<USFWeaponData> Instance;
 };
 
@@ -84,11 +84,15 @@ public:
 	void PostReplicatedChange(const TArrayView<int32> ChangedIndices, int32 FinalSize);
 	//~End of FFastArraySerializer contract
 
+	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
+	{
+		return FFastArraySerializer::FastArrayDeltaSerialize<FInventoryEntry, FInventory>(Entries, DeltaParms, *this);
+	}
+
 	USFWeaponData* AddEnty(TSubclassOf<USFWeaponData> InWeaponDataClass);
 	void RemoveEntry(USFWeaponData* InInstance);
 
 private:
-	// Replicated list of equipment entries
 	UPROPERTY()
 	TArray<FInventoryEntry> Entries;
 
@@ -98,6 +102,16 @@ private:
 
 	friend ASFCharacter;
 };
+
+template<>
+struct TStructOpsTypeTraits<FInventory> : public TStructOpsTypeTraitsBase2<FInventory>
+{
+	enum { WithNetDeltaSerializer = true };
+};
+
+
+
+
 
 UCLASS(config=Game)
 class ASFCharacter : public ACharacter
@@ -134,9 +148,14 @@ public:
 	FOnHpZero OnHpZero;
 
 protected:
-	UFUNCTION()
-	void OnRep_Weapons();
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetAnimation();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SpawnWeapon();
+
+	void SetAnimation();
+	
 	UFUNCTION()
 	void OnRep_WeaponIndex();
 
@@ -154,7 +173,10 @@ protected:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	FInventory Inventory;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
-	TObjectPtr<USFWeaponData> CurrentWeapon = nullptr;
+	UPROPERTY(ReplicatedUsing = OnRep_WeaponIndex, VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+	int32 WeaponIndex = INDEX_NONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	TSubclassOf<UAnimInstance> DefaultAnimationClass;
 };
 

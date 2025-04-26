@@ -9,6 +9,7 @@ ASFWeapon::ASFWeapon()
 {
 	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	RootComponent = MeshComp;
+	SetReplicates(true);
 }
 
 void ASFWeapon::Attack()

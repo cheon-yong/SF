@@ -31,12 +31,34 @@ void FInventory::PreReplicatedRemove(const TArrayView<int32> RemovedIndices, int
 	}
 }
 
+UE_DISABLE_OPTIMIZATION
 void FInventory::PostReplicatedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize)
 {
+	for (int32 Index : AddedIndices)
+	{
+		if (Entries.IsValidIndex(Index))
+		{
+			FInventoryEntry& Entry = Entries[Index];
+			if (!Entry.Instance && Entry.WeaponDataClass)
+			{
+				Entry.Instance = NewObject<USFWeaponData>(Owner, Entry.WeaponDataClass);
+				UE_LOG(LogTemp, Warning, TEXT("Instance created for index %d"), Index);
+			}
+		}
+	}
 }
+UE_ENABLE_OPTIMIZATION
 
 void FInventory::PostReplicatedChange(const TArrayView<int32> ChangedIndices, int32 FinalSize)
 {
+	for (int32 Index : ChangedIndices)
+	{
+		FInventoryEntry& Stack = Entries[Index];
+		if (Stack.Instance == nullptr)
+		{
+			Stack.Instance = NewObject<USFWeaponData>(Owner, Stack.WeaponDataClass);
+		}
+	}
 }
 
 USFWeaponData* FInventory::AddEnty(TSubclassOf<USFWeaponData> InWeaponDataClass)
@@ -59,6 +81,15 @@ USFWeaponData* FInventory::AddEnty(TSubclassOf<USFWeaponData> InWeaponDataClass)
 
 void FInventory::RemoveEntry(USFWeaponData* InInstance)
 {
+	for (auto EntryIt = Entries.CreateIterator(); EntryIt; ++EntryIt)
+	{
+		FInventoryEntry& Entry = *EntryIt;
+		if (Entry.Instance == InInstance)
+		{
+			EntryIt.RemoveCurrent();
+			MarkArrayDirty();
+		}
+	}
 }
 
 
@@ -89,12 +120,21 @@ ASFCharacter::ASFCharacter()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
+
+	SetReplicates(true);
+}
+
+void ASFCharacter::OnRep_WeaponIndex()
+{
+	SetAnimation();
 }
 
 void ASFCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	GetMesh()->SetAnimInstanceClass(DefaultAnimationClass);
 
 	OnHpZero.AddDynamic(this, &ThisClass::OnDeath);
 }
@@ -104,16 +144,20 @@ void ASFCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, Inventory);
+	DOREPLIFETIME(ThisClass, WeaponIndex);
 }
 
 
 void ASFCharacter::AddWeapon(TSubclassOf<USFWeaponData> WeaponDataClass)
 {
-	Inventory.AddEnty(WeaponDataClass);
-
-	if (CurrentWeapon == nullptr)
+	if (HasAuthority())
 	{
-		EquipWeapon(0);
+		Inventory.AddEnty(WeaponDataClass);
+	
+		if (WeaponIndex == INDEX_NONE)
+		{
+			EquipWeapon(0);
+		}
 	}
 }
 
@@ -123,46 +167,92 @@ void ASFCharacter::RemoveWeapon(TObjectPtr<USFWeaponData> WeaponData)
 
 void ASFCharacter::EquipWeapon(int32 Index)
 {
+	if (WeaponIndex != INDEX_NONE)
+	{
+		UnequipWeapon();
+	}
+
+	WeaponIndex = Index;
 	if (HasAuthority())
 	{
-		if(CurrentWeapon != nullptr)
-		{
-			UnequipWeapon();
-		}
-
-		CurrentWeapon = Inventory.Entries[Index].Instance;
+		//SpawnWeapon();
 		SpawnWeapon();
 	}
 }
 
 void ASFCharacter::SpawnWeapon()
 {
-	CurrentWeapon->SpawnWeapon(this);
-	if (CurrentWeapon->AnimInstanceClass)
+	Inventory.Entries[WeaponIndex].Instance->SpawnWeapon(this);
+
+	SetAnimation();
+}
+
+void ASFCharacter::SetAnimation()
+{
+	if (WeaponIndex == INDEX_NONE)
+		return;
+
+	if (USFWeaponData* WeaponCDO = Inventory.Entries[WeaponIndex].WeaponDataClass.GetDefaultObject())
+	{
+		GetMesh()->SetAnimInstanceClass(WeaponCDO->AnimInstanceClass);
+	}
+}
+
+void ASFCharacter::Multicast_SetAnimation_Implementation()
+{
+	if (WeaponIndex == INDEX_NONE)
+		return;
+
+	if (USFWeaponData* CurrentWeapon = Inventory.Entries[WeaponIndex].Instance)
 	{
 		GetMesh()->SetAnimInstanceClass(CurrentWeapon->AnimInstanceClass);
 	}
 }
 
+void ASFCharacter::Multicast_SpawnWeapon_Implementation()
+{
+
+}
+
 void ASFCharacter::UnequipWeapon()
 {
 	//Inventory.UnequipWeapon(Index);
-	if (CurrentWeapon->SpawnedWeapon)
+	if (WeaponIndex == INDEX_NONE)
+		return;
+	
+	USFWeaponData* WeaponData = Inventory.Entries[WeaponIndex].Instance;
+	if (WeaponData->SpawnedWeapon)
 	{
-		CurrentWeapon->SpawnedWeapon->OnUnequipped();
-		CurrentWeapon->SpawnedWeapon->Destroy();
-		CurrentWeapon->SpawnedWeapon = nullptr;
+		WeaponData->SpawnedWeapon->OnUnequipped();
+		WeaponData->SpawnedWeapon->Destroy();
+		WeaponData->SpawnedWeapon = nullptr;
 	}
 
-	CurrentWeapon = nullptr;
+	Inventory.RemoveEntry(WeaponData);
+	WeaponData = nullptr;
 }
 
 void ASFCharacter::UseWeapon()
 {
-	if (CurrentWeapon != nullptr)
+	if (HasAuthority())
 	{
-		CurrentWeapon->SpawnedWeapon->Attack();
+		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue,
+			FString::Printf(TEXT("Try Server Attack")));
 	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue,
+			FString::Printf(TEXT("Try Client Attack")));
+	}
+
+	/*if (WeaponIndex == INDEX_NONE)
+		return;
+
+	if (USFWeaponData* CurrentWeapon = Inventory.Entries[WeaponIndex].Instance)
+	{
+		ASFWeapon* WeaponCDO = CurrentWeapon->WeaponClass.GetDefaultObject();
+		WeaponCDO->Attack();
+	}*/
 }
 
 void ASFCharacter::OnDamage(uint8 Damage, AActor* instigator)
@@ -185,18 +275,6 @@ void ASFCharacter::OnDeath()
 {
 	Destroy();
 }
-
-void ASFCharacter::OnRep_Weapons()
-{
-	SpawnWeapon();
-}
-
-void ASFCharacter::OnRep_WeaponIndex()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue,
-		FString::Printf(TEXT("OnRep_WeaponIndex")));
-}
-
 
 void ASFCharacter::SetupCharacterWidget(USFUserWidget* InUserWidget)
 {

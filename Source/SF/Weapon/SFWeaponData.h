@@ -17,6 +17,9 @@ class SF_API USFWeaponData : public UObject
 	GENERATED_BODY()
 	
 public:
+
+	virtual bool IsSupportedForNetworking() const override { return true; }
+
 	void SetOwner(AActor* InOwner);
 
 	void SetInstigator(APawn* InInstigator);
