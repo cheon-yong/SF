@@ -23,19 +23,26 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
+protected:
+
+	// To add mapping context
+	virtual void BeginPlay() override;
+
+	void SetColor();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION()
+	void OnRep_Pitch();
+
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(ReplicatedUsing = OnRep_Pitch, VisibleAnywhere, BlueprintReadOnly)
 	float Pitch_SideScroll;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector ToMouseVector;
 	
-protected:
-	
-	// To add mapping context
-	virtual void BeginPlay() override;
 
-	void SetColor();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Color, meta = (AllowPrivateAccess = "true"))

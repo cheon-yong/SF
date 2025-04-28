@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "GameFramework/GameStateBase.h"
 #include <Game/SFGameMode.h>
 #include "Weapon/SFWeapon.h"
 #include "Weapon/SFWeaponData.h"
@@ -126,7 +127,22 @@ ASFCharacter::ASFCharacter()
 
 void ASFCharacter::OnRep_WeaponIndex()
 {
+	//SetAnimation();
+
+}
+
+void ASFCharacter::OnRep_CurrentWeapon()
+{
+	
 	SetAnimation();
+}
+
+void ASFCharacter::OnRep_MaxHp()
+{
+}
+
+void ASFCharacter::OnRep_Hp()
+{
 }
 
 void ASFCharacter::BeginPlay()
@@ -145,6 +161,9 @@ void ASFCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 
 	DOREPLIFETIME(ThisClass, Inventory);
 	DOREPLIFETIME(ThisClass, WeaponIndex);
+	DOREPLIFETIME(ThisClass, CurrentWeapon);
+	DOREPLIFETIME(ThisClass, MaxHp);
+	DOREPLIFETIME(ThisClass, CurrentHp);
 }
 
 
@@ -182,9 +201,11 @@ void ASFCharacter::EquipWeapon(int32 Index)
 
 void ASFCharacter::SpawnWeapon()
 {
-	Inventory.Entries[WeaponIndex].Instance->SpawnWeapon(this);
-
-	SetAnimation();
+	CurrentWeapon = Inventory.Entries[WeaponIndex].Instance->SpawnWeapon(this);
+	if (HasAuthority())
+	{
+		SetAnimation();
+	}
 }
 
 void ASFCharacter::SetAnimation()
@@ -203,9 +224,9 @@ void ASFCharacter::Multicast_SetAnimation_Implementation()
 	if (WeaponIndex == INDEX_NONE)
 		return;
 
-	if (USFWeaponData* CurrentWeapon = Inventory.Entries[WeaponIndex].Instance)
+	if (USFWeaponData* WeaponData = Inventory.Entries[WeaponIndex].Instance)
 	{
-		GetMesh()->SetAnimInstanceClass(CurrentWeapon->AnimInstanceClass);
+		GetMesh()->SetAnimInstanceClass(WeaponData->AnimInstanceClass);
 	}
 }
 
@@ -234,26 +255,40 @@ void ASFCharacter::UnequipWeapon()
 
 void ASFCharacter::UseWeapon()
 {
-	if (HasAuthority())
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue,
-			FString::Printf(TEXT("Try Server Attack")));
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue,
-			FString::Printf(TEXT("Try Client Attack")));
-	}
+	AGameStateBase* State = GetWorld()->GetGameState();
+	float RequestTime = State->GetServerWorldTimeSeconds();
 
-	/*if (WeaponIndex == INDEX_NONE)
+	if (!HasAuthority())
+	{
+		UseWeaponInternal(RequestTime);
+	}
+	Server_UseWeapon(RequestTime);
+}
+
+
+void ASFCharacter::Server_UseWeapon_Implementation(float RequestTime)
+{
+	UseWeaponInternal(RequestTime);
+	Multicast_UseWeapon(RequestTime);
+}
+
+void ASFCharacter::Multicast_UseWeapon_Implementation(float RequestTime)
+{
+	if (!IsLocallyControlled())
+		UseWeaponInternal(RequestTime);
+}
+
+void ASFCharacter::UseWeaponInternal(float AttackTime)
+{
+	if (WeaponIndex == INDEX_NONE)
 		return;
 
-	if (USFWeaponData* CurrentWeapon = Inventory.Entries[WeaponIndex].Instance)
+	if (CurrentWeapon)
 	{
-		ASFWeapon* WeaponCDO = CurrentWeapon->WeaponClass.GetDefaultObject();
-		WeaponCDO->Attack();
-	}*/
+		CurrentWeapon->Attack();
+	}
 }
+
 
 void ASFCharacter::OnDamage(uint8 Damage, AActor* instigator)
 {

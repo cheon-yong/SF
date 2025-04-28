@@ -132,6 +132,14 @@ public:
 	void UnequipWeapon();
 
 	virtual void UseWeapon();
+	void UseWeaponInternal(float AttackTime);
+
+	UFUNCTION(Server, Reliable)
+	void Server_UseWeapon(float RequestTime);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_UseWeapon(float RequestTime);
+
 	// ~Weapon
 
 	virtual void OnDamage(uint8 Damage, AActor* instigator);
@@ -148,26 +156,38 @@ public:
 	FOnHpZero OnHpZero;
 
 protected:
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_SetAnimation();
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_SpawnWeapon();
 
 	void SetAnimation();
 	
+	// OnRep
 	UFUNCTION()
 	void OnRep_WeaponIndex();
+
+	UFUNCTION()
+	void OnRep_CurrentWeapon();
+
+	UFUNCTION()
+	void OnRep_MaxHp();
+
+	UFUNCTION()
+	void OnRep_Hp();
+
+	// End OnRep
 
 	virtual void BeginPlay() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	UPROPERTY(ReplicatedUsing = OnRep_MaxHp , EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	uint8 MaxHp = 20;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	UPROPERTY(ReplicatedUsing = OnRep_Hp, EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	uint8 CurrentHp = 20;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
@@ -175,6 +195,9 @@ protected:
 
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponIndex, VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	int32 WeaponIndex = INDEX_NONE;
+
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentWeapon, VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+	TObjectPtr<ASFWeapon> CurrentWeapon = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	TSubclassOf<UAnimInstance> DefaultAnimationClass;

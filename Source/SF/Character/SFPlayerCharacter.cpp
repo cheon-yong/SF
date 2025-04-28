@@ -8,6 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Camera/CameraComponent.h"
+#include <Net/UnrealNetwork.h>
 
 
 ASFPlayerCharacter::ASFPlayerCharacter() 
@@ -67,4 +68,16 @@ void ASFPlayerCharacter::SetColor()
 			GetMesh()->SetMaterial(1, CharacterColorMaterials[(int)ECharacterColor::Blue].Material1);
 		}
 	}
+}
+
+void ASFPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, Pitch_SideScroll);
+}
+
+void ASFPlayerCharacter::OnRep_Pitch()
+{
+	
 }
