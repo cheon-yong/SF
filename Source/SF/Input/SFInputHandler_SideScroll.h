@@ -46,6 +46,7 @@ protected:
 
 	void StopJumping();
 
+		
 public:
 	/** Jump Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -66,8 +67,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Jump)
 	UAnimMontage* WallJumpMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	float AimAngleUpdateThreshold = 0.2f;
+		
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input)
 	float Pitch;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input)
+	float PrevPitch;
 		
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, meta = (AllowPrivateAccess = "true"))
 	FRotator TargetRotationRate;

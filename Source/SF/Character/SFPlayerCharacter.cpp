@@ -77,6 +77,13 @@ void ASFPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	DOREPLIFETIME(ThisClass, Pitch_SideScroll);
 }
 
+
+void ASFPlayerCharacter::Server_UpdateAim_Implementation(float NewPitch)
+{
+	Pitch_SideScroll = NewPitch;
+}
+
+
 void ASFPlayerCharacter::OnRep_Pitch()
 {
 	

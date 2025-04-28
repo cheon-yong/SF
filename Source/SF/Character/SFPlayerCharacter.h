@@ -23,6 +23,9 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
+	UFUNCTION(Server, Reliable)
+	void Server_UpdateAim(float NewPitch);
+
 protected:
 
 	// To add mapping context

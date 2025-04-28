@@ -66,7 +66,6 @@ void USFInputHandler_SideScroll::Tick(float DeltaSeconds)
 	SetAimOffset();
 }
 
-UE_DISABLE_OPTIMIZATION
 void USFInputHandler_SideScroll::SetAimOffset()
 {
 	// Get Mouse Location in world
@@ -161,14 +160,28 @@ void USFInputHandler_SideScroll::SetAimOffset()
 	// 8. Clamp (선택사항)
 	AimAngle = FMath::Clamp(AimAngle, -90.f, 90.f);
 
+	PrevPitch = Pitch;
 	Pitch = AimAngle;
-	if (ASFPlayerCharacter* SFCharacter = Cast<ASFPlayerCharacter>(Character))
+
+	if (FMath::Abs(PrevPitch - Pitch) >= AimAngleUpdateThreshold)
 	{
-		SFCharacter->Pitch_SideScroll = Pitch;
-		//SFCharacter->ToMouseVector = ToMouse;
+		if (SFPlayerController->HasAuthority())
+		{
+			if (ASFPlayerCharacter* SFCharacter = Cast<ASFPlayerCharacter>(Character))
+			{
+				SFCharacter->Pitch_SideScroll = Pitch;
+			}
+		}
+		else
+		{
+			if (ASFPlayerCharacter* SFCharacter = Cast<ASFPlayerCharacter>(Character))
+			{
+				SFCharacter->Server_UpdateAim(Pitch);
+			}
+		}
 	}
 }
-UE_ENABLE_OPTIMIZATION
+
 
 void USFInputHandler_SideScroll::DrawDebug2DVector(const FVector2D& Vector2D, const FVector& Origin, float Scale, FColor Color)
 {
@@ -278,3 +291,4 @@ void USFInputHandler_SideScroll::StopJumping()
 		ControlledCharacter->StopJumping();
 	}
 }
+
