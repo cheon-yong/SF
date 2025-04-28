@@ -13,6 +13,7 @@
 #include "Components/CapsuleComponent.h"
 #include "EngineUtils.h"
 #include "Camera/SFCameraActor_SideScroll.h"
+#include "Player/LocalPlayerBlueprintLibrary.h"
 
 USFInputHandler_SideScroll::USFInputHandler_SideScroll()
 {
@@ -65,6 +66,7 @@ void USFInputHandler_SideScroll::Tick(float DeltaSeconds)
 	SetAimOffset();
 }
 
+UE_DISABLE_OPTIMIZATION
 void USFInputHandler_SideScroll::SetAimOffset()
 {
 	// Get Mouse Location in world
@@ -78,14 +80,36 @@ void USFInputHandler_SideScroll::SetAimOffset()
 
 	FVector MouseWorldPosition;
 	FHitResult HitResult;
-	if (SFPlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
+	FVector2D ClientMousePos;
+	if (SFPlayerController->HasAuthority())
 	{
-		MouseWorldPosition = HitResult.Location;
+		if (SFPlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
+		{
+			MouseWorldPosition = HitResult.Location;
+		}
+	}
+	else
+	{
+		if (SFPlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
+		{
+			MouseWorldPosition = HitResult.Location;
+		}
 
-		// 이제 MouseWorldPosition이 정확한 월드 좌표입니다!
-		UE_LOG(LogTemp, Log, TEXT("Mouse World Position: %s"), *MouseWorldPosition.ToString());
-
-		//DrawDebugSphere(GetWorld(), MouseWorldPosition, 1.0f, 12, FColor::Red, false, 1.0f);
+		const TArray<class ULocalPlayer*> LocalPlayers = GetWorld()->GetGameInstance()->GetLocalPlayers();
+		for (auto LC : LocalPlayers)
+		{
+			if (ASFPlayerController* SFPC = Cast<ASFPlayerController>(LC->PlayerController))
+			{
+				if (SFPC->bMainController == false)
+				{
+					if (LC->PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
+					{
+						MouseWorldPosition = HitResult.Location;
+					}
+					//SFPlayerController->GetMousePosition(ClientMousePos.X, ClientMousePos.Y);
+				}
+			}
+		}
 	}
 
 	// Get Direct Vector
@@ -143,8 +167,8 @@ void USFInputHandler_SideScroll::SetAimOffset()
 		SFCharacter->Pitch_SideScroll = Pitch;
 		//SFCharacter->ToMouseVector = ToMouse;
 	}
-
 }
+UE_ENABLE_OPTIMIZATION
 
 void USFInputHandler_SideScroll::DrawDebug2DVector(const FVector2D& Vector2D, const FVector& Origin, float Scale, FColor Color)
 {

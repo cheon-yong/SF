@@ -33,7 +33,6 @@ void ASFPlayerController::OnRep_PlayerState()
 				FString Error;
 				int32 NewId = GameInstance->GetLocalPlayerByIndex(0)->GetControllerId() + 1;
 				ULocalPlayer* EmptyLocalPlayer = GameInstance->CreateLocalPlayer(NewId, Error, true);
-
 			}
 			else
 			{
