@@ -23,14 +23,19 @@ ASFCameraActor_SideScroll::ASFCameraActor_SideScroll()
 	GetCameraComponent()->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	GetCameraComponent()->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	bActive = false;
+	bActivating = false;
 
 
 }
 
-void ASFCameraActor_SideScroll::SetActive(bool Active)
+void ASFCameraActor_SideScroll::SetActiveCamera(bool Active)
 {
-	bActive = Active;
+	bActivating = Active;
+
+	if (bActivating)
+	{
+		GetPlayers();
+	}
 }
 
 void ASFCameraActor_SideScroll::GetPlayers()
@@ -49,7 +54,7 @@ void ASFCameraActor_SideScroll::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bActive == false)
+	if (bActivating == false)
 		return;
 
 	GetTargetValues();

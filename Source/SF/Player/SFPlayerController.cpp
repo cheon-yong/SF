@@ -32,7 +32,8 @@ void ASFPlayerController::OnRep_PlayerState()
 			{
 				FString Error;
 				int32 NewId = GameInstance->GetLocalPlayerByIndex(0)->GetControllerId() + 1;
-				GameInstance->CreateLocalPlayer(NewId, Error, true);
+				ULocalPlayer* EmptyLocalPlayer = GameInstance->CreateLocalPlayer(NewId, Error, true);
+
 			}
 			else
 			{
@@ -45,7 +46,6 @@ void ASFPlayerController::OnRep_PlayerState()
 void ASFPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
 
 }
 
@@ -72,10 +72,26 @@ void ASFPlayerController::SetupInputComponent()
 	}
 
 	BindInputHandler(CurrentInputHandler);
-
 }
 
 void ASFPlayerController::ChangeControlType(EControlType NewControlType)
+{
+	TSubclassOf<USFInputHandler> NewInputHandlerClass = InputHandlerClassMap[NewControlType];
+	if (CurrentInputHandler->StaticClass() == NewInputHandlerClass)
+	{
+		return;
+	}
+
+	if (CurrentInputHandler)
+	{
+		CurrentInputHandler->RemoveInputHandler();
+	}
+	USFInputHandler* NewInputHandler = NewObject<USFInputHandler>(this, NewInputHandlerClass);
+	BindInputHandler(NewInputHandler);
+	CurrentInputHandler = NewInputHandler;
+}
+
+void ASFPlayerController::Multicast_ChangeControlType_Implementation(EControlType NewControlType)
 {
 	TSubclassOf<USFInputHandler> NewInputHandlerClass = InputHandlerClassMap[NewControlType];
 	if (CurrentInputHandler->StaticClass() == NewInputHandlerClass)
@@ -130,6 +146,12 @@ void ASFPlayerController::Client_UpdateSecondController_Implementation()
 					continue;	
 
 				PC->bAutoManageActiveCameraTarget = false;	
+
+				if (ASFPlayerController* SFPC = Cast<ASFPlayerController>(PC))
+				{
+					SFPC->bMainController = false;
+				}
+
 			}
 		}
 

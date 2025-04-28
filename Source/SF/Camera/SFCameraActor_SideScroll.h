@@ -18,7 +18,8 @@ class SF_API ASFCameraActor_SideScroll : public ACameraActor
 public:
 	ASFCameraActor_SideScroll();
 
-	void SetActive(bool Active);
+	UFUNCTION(BlueprintCallable)
+	void SetActiveCamera(bool Active);
 
 	UFUNCTION(BlueprintCallable)
 	void GetPlayers();
@@ -60,5 +61,5 @@ protected:
 	float ZoomSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	bool bActive;
+	bool bActivating;
 };

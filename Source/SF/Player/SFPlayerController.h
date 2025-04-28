@@ -29,8 +29,11 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetupInputComponent() override;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	void ChangeControlType(EControlType NewControlType);
+	
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
+	void Multicast_ChangeControlType(EControlType NewControlType);
 
 	UFUNCTION(Server, Reliable)
 	void Server_DeleteSecondPawn();
@@ -54,4 +57,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	USFInputHandler* CurrentInputHandler;
+
+	bool bMainController = true;
 };
