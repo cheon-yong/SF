@@ -8,7 +8,6 @@
 #include "Character/SFPlayerCharacter.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
-UE_DISABLE_OPTIMIZATION
 void ASFRangeWeapon::Attack()
 {
 	if (ProjectileClass)
@@ -42,4 +41,3 @@ void ASFRangeWeapon::Attack()
 		OnFire.Broadcast();
 	}
 }
-UE_ENABLE_OPTIMIZATION

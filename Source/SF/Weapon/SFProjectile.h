@@ -9,6 +9,9 @@
 class USphereComponent;
 class UProjectileMovementComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHit);
+
+
 UCLASS()
 class SF_API ASFProjectile : public AActor
 {
@@ -19,7 +22,7 @@ public:
 
 	/** called when projectile hits something */
 	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	void OnBeginHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	/** Returns CollisionComp subobject **/
 	USphereComponent* GetCollisionComp() const { return CollisionComp; }
@@ -29,6 +32,9 @@ public:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 Damage = 0;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnHit OnHit;
 
 protected:
 	
