@@ -29,7 +29,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetupInputComponent() override;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void ChangeControlType(EControlType NewControlType);
 	
 	UFUNCTION(NetMulticast, Reliable, BlueprintCallable)

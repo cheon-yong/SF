@@ -131,6 +131,8 @@ public:
 
 	void UnequipWeapon();
 
+	ASFWeapon* GetCurrentWeapon() { return CurrentWeapon; };
+
 	virtual void UseWeapon();
 	void UseWeaponInternal(float AttackTime);
 
@@ -139,7 +141,6 @@ public:
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_UseWeapon(float RequestTime);
-
 	// ~Weapon
 
 	virtual void OnDamage(uint8 Damage, AActor* instigator);

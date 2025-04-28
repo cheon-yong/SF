@@ -7,6 +7,7 @@
 
 class UInputAction;
 struct FInputActionValue;
+class ASFCameraActor_SideScroll;
 
 /**
  * 
@@ -26,6 +27,8 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 	void SetAimOffset();
+
+	void DrawDebug2DVector(const FVector2D& Vector2D, const FVector& Origin, float Scale = 100.0f, FColor Color = FColor::Green);
 
 protected:
 	void Shoot();
@@ -71,4 +74,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FRotator OriginRate;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	ASFCameraActor_SideScroll* SideCamera;
 };

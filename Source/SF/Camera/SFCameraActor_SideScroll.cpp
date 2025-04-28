@@ -25,7 +25,6 @@ ASFCameraActor_SideScroll::ASFCameraActor_SideScroll()
 
 	bActivating = false;
 
-
 }
 
 void ASFCameraActor_SideScroll::SetActiveCamera(bool Active)

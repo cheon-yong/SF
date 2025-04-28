@@ -19,6 +19,7 @@ public class SF : ModuleRules
 			"InputCore", 
 			"EnhancedInput",
 			"UMG",
+			"Slate",
 
 			"NetCore",
 

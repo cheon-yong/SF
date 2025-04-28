@@ -11,6 +11,8 @@
 #include <Character/SFCharacter.h>
 #include "CollisionQueryParams.h"
 #include "Components/CapsuleComponent.h"
+#include "EngineUtils.h"
+#include "Camera/SFCameraActor_SideScroll.h"
 
 USFInputHandler_SideScroll::USFInputHandler_SideScroll()
 {
@@ -52,6 +54,14 @@ void USFInputHandler_SideScroll::Unbind()
 
 void USFInputHandler_SideScroll::Tick(float DeltaSeconds)
 {
+	if (SideCamera == nullptr)
+	{
+		for (TActorIterator<ASFCameraActor_SideScroll> It(GetWorld()); It; ++It)
+		{
+			SideCamera = *It;
+		}
+	}
+
 	SetAimOffset();
 }
 
@@ -61,19 +71,22 @@ void USFInputHandler_SideScroll::SetAimOffset()
 	FVector2D MousePosition;
 	FVector WorldLocation, WorldDirection;
 
-	if (SFPlayerController == nullptr || SFPlayerController->bMainController == false)
+	if (SFPlayerController == nullptr || SFPlayerController->bMainController == false || SideCamera == nullptr)
 	{
 		return;
 	}
 
-	bool bFindMouse = SFPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y);
-	if (bFindMouse == false)
+	FVector MouseWorldPosition;
+	FHitResult HitResult;
+	if (SFPlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
 	{
-		return;
-	}
-		
+		MouseWorldPosition = HitResult.Location;
 
-	SFPlayerController->DeprojectScreenPositionToWorld(MousePosition.X, MousePosition.Y, WorldLocation, WorldDirection);
+		// 이제 MouseWorldPosition이 정확한 월드 좌표입니다!
+		UE_LOG(LogTemp, Log, TEXT("Mouse World Position: %s"), *MouseWorldPosition.ToString());
+
+		//DrawDebugSphere(GetWorld(), MouseWorldPosition, 1.0f, 12, FColor::Red, false, 1.0f);
+	}
 
 	// Get Direct Vector
 	ACharacter* Character = SFPlayerController->GetCharacter();
@@ -82,44 +95,72 @@ void USFInputHandler_SideScroll::SetAimOffset()
 		return;
 	}
 
-
-	// 마우스 위치까지 직선 거리 확장
-	FVector MouseWorldPos = WorldLocation + WorldDirection * 10000.f;
-
 	// 2D 평면에서 각도 계산 (횡스크롤 → 보통 X-Z 또는 X-Y 기준)
-	FVector CharacterLocation = Character->GetActorLocation();
+	FVector CharacterLocation = Character->GetActorLocation() + FVector(0.f, 0.f, 60.f);
+	FVector CameraLocation = SideCamera->GetActorLocation();
+	FVector Direction = (MouseWorldPosition - CameraLocation).GetSafeNormal(); // 정규화된 방향
+	FVector ProjectedPosition;
 
-	FVector2D ToMouse;
-	ToMouse.X = MouseWorldPos.X - CharacterLocation.X;
-	ToMouse.Y = MouseWorldPos.Z - CharacterLocation.Z; // 횡스크롤에서는 Z축이 화면 위쪽인 경우
+	if (FMath::Abs(Direction.Y) > KINDA_SMALL_NUMBER)
+	{
+		// 2. 캐릭터의 Y좌표에 도달할 때까지 연장할 거리(t) 계산
+		float t = (CharacterLocation.Y - CameraLocation.Y) / Direction.Y;
+		// 3. 최종 투영 위치 계산
+		ProjectedPosition = CameraLocation + Direction * t;
+	}
 
-	FVector ToMouseVector = FVector(ToMouse.X, CharacterLocation.Y, ToMouse.Y);
+	FVector2D ToProjected;
+	ToProjected.X = ProjectedPosition.X - CharacterLocation.X;
+	ToProjected.Y = ProjectedPosition.Z - CharacterLocation.Z;
 
+	// 2. 캐릭터 Forward 벡터 (X-Z 평면)
 	FVector ForwardVector = Character->GetActorForwardVector();
-	FVector2D Forward = FVector2D(ForwardVector.X, ForwardVector.Z);
+	FVector2D Forward2D = FVector2D(ForwardVector.X, ForwardVector.Z);
 
-	ToMouse.Normalize();
-	Forward.Normalize();
+	// 3. 정규화
+	ToProjected.Normalize();
+	Forward2D.Normalize();
 
-	// 두 벡터 사이의 각도 (라디안)
-	float AngleRad = FMath::Acos(FVector2D::DotProduct(Forward, ToMouse));
+	// 4. Dot Product
+	float Dot = FVector2D::DotProduct(Forward2D, ToProjected);
+	Dot = FMath::Clamp(Dot, -1.0f, 1.0f); // 안전성 확보
 
-	// 부호 판단 (위쪽 조준인지 아래 조준인지)
-	float Sign = FMath::Sign(ToMouse.Y);
+	// 5. 라디안 각도 구하기
+	float AngleRad = FMath::Acos(Dot);
 
-	// 최종 Pitch (도 단위로 변환, 부호 포함)
-	float PitchDeg = FMath::RadiansToDegrees(AngleRad) * Sign;
+	// 6. 부호(Sign) 판별
+	float Sign = FMath::Sign(ToProjected.Y);
 
-	// Clamp (AimOffset에서 -90~90으로 제한)
-	PitchDeg = FMath::Clamp(PitchDeg, -90.f, 90.f);
+	// 7. 최종 각도 (Degrees)
+	float AimAngle = FMath::RadiansToDegrees(AngleRad) * Sign;
 
-	Pitch = PitchDeg;
+	// 8. Clamp (선택사항)
+	AimAngle = FMath::Clamp(AimAngle, -90.f, 90.f);
+
+	Pitch = AimAngle;
 	if (ASFPlayerCharacter* SFCharacter = Cast<ASFPlayerCharacter>(Character))
 	{
 		SFCharacter->Pitch_SideScroll = Pitch;
-		SFCharacter->ToMouseVector = ToMouseVector;
+		//SFCharacter->ToMouseVector = ToMouse;
 	}
 
+}
+
+void USFInputHandler_SideScroll::DrawDebug2DVector(const FVector2D& Vector2D, const FVector& Origin, float Scale, FColor Color)
+{
+	FVector Start = Origin;
+	FVector End = Origin + FVector(Vector2D.X, 0.0f, Vector2D.Y) * Scale;
+
+	DrawDebugLine(
+		GetWorld(),
+		Start,
+		End,
+		Color,
+		false,
+		1.0f, // 지속 시간 (초)
+		0,
+		2.0f // 두께
+	);
 }
 
 void USFInputHandler_SideScroll::Shoot()
