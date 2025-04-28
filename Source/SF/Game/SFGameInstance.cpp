@@ -40,6 +40,11 @@ ULocalPlayer* USFGameInstance::CreateLocalPlayer(APlayerController* NewPlayerCon
 		
 		NewPlayer->PlayerController = NewPlayerController;
 
+		if (ASFPlayerController* SFPC = Cast<ASFPlayerController>(NewPlayer->PlayerController))
+		{
+			SFPC->bMainController = false;
+		}
+	
 		InsertIndex = AddLocalPlayer(NewPlayer, UserId);
 		UWorld* CurrentWorld = GetWorld();
 		if (InsertIndex != INDEX_NONE && CurrentWorld != nullptr)

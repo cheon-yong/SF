@@ -6,6 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "Player/SFPlayerController.h"
 
+UE_DISABLE_OPTIMIZATION
 APlayerController* ULocalPlayerBlueprintLibrary::GetServerControllerInClient(const UObject* WorldContext)
 {
 
@@ -16,26 +17,35 @@ APlayerController* ULocalPlayerBlueprintLibrary::GetServerControllerInClient(con
 
 	if (UGameInstance* GameInstance = World->GetGameInstance())
 	{
-		if (World->GetGameState()->HasAuthority())
-		{
+		if (World->GetNetMode() != ENetMode::NM_Client)
+		{	
 			return nullptr;
 		}
 
 		auto LocalPlayers = GameInstance->GetLocalPlayers();
 		for (const ULocalPlayer* LC : LocalPlayers)
 		{
-			if (APlayerController* PC = LC->GetPlayerController(World))
+			if (ASFPlayerController* SFPC = Cast<ASFPlayerController>(LC->GetPlayerController(World)))
+			{
+				if (SFPC->bMainController == false)
+				{
+					return SFPC;
+				}
+			}
+
+			/*if (APlayerController* PC = LC->GetPlayerController(World))
 			{
 				if (PC->GetPawn())
 					continue;
 
 				return PC;
-			}
+			}*/
 		}
 	}
 
 	return nullptr;
 }
+UE_ENABLE_OPTIMIZATION
 
 void ULocalPlayerBlueprintLibrary::ChangeControlType(APlayerController* InPlayerController, EControlType NewControlType)
 {
@@ -43,7 +53,8 @@ void ULocalPlayerBlueprintLibrary::ChangeControlType(APlayerController* InPlayer
 	{
 		if (ASFPlayerController* SFPC = Cast<ASFPlayerController>(InPlayerController))
 		{
-			SFPC->ChangeControlType(NewControlType);
+			if (SFPC->HasAuthority())
+				SFPC->Multicast_ChangeControlType(NewControlType);
 		}
 	}
 }
