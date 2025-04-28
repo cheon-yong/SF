@@ -61,18 +61,27 @@ void USFInputHandler_SideScroll::SetAimOffset()
 	FVector2D MousePosition;
 	FVector WorldLocation, WorldDirection;
 
-	if (SFPlayerController == nullptr)
+	if (SFPlayerController == nullptr || SFPlayerController->bMainController == false)
 	{
 		return;
 	}
+
 	bool bFindMouse = SFPlayerController->GetMousePosition(MousePosition.X, MousePosition.Y);
-	if (!bFindMouse)
+	if (bFindMouse == false)
+	{
 		return;
+	}
+		
 
 	SFPlayerController->DeprojectScreenPositionToWorld(MousePosition.X, MousePosition.Y, WorldLocation, WorldDirection);
 
 	// Get Direct Vector
 	ACharacter* Character = SFPlayerController->GetCharacter();
+	if (Character == nullptr)
+	{
+		return;
+	}
+
 
 	// 마우스 위치까지 직선 거리 확장
 	FVector MouseWorldPos = WorldLocation + WorldDirection * 10000.f;
