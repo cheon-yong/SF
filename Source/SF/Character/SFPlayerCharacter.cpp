@@ -9,6 +9,7 @@
 #include "InputActionValue.h"
 #include "Camera/CameraComponent.h"
 #include <Net/UnrealNetwork.h>
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 ASFPlayerCharacter::ASFPlayerCharacter() 
@@ -30,6 +31,11 @@ ASFPlayerCharacter::ASFPlayerCharacter()
 
 	Pitch_SideScroll = 0;
 	ToMouseVector = FVector::Zero();
+}
+
+void ASFPlayerCharacter::ChangeCameraComponent()
+{
+	
 }
 
 void ASFPlayerCharacter::BeginPlay()

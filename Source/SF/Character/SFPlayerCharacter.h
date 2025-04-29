@@ -26,12 +26,15 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_UpdateAim(float NewPitch);
 
+	UFUNCTION(BlueprintCallable)
+	void ChangeCameraComponent();
+
 protected:
 
 	// To add mapping context
 	virtual void BeginPlay() override;
 
-	void SetColor();
+	virtual void SetColor();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -44,8 +47,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector ToMouseVector;
-	
-
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Color, meta = (AllowPrivateAccess = "true"))
@@ -59,4 +60,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UCameraComponent> SplitCameraComponentClass;
 };
