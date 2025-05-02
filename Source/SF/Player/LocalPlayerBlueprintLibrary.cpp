@@ -5,6 +5,7 @@
 #include "GameFramework/GameStateBase.h"
 #include "Engine/GameInstance.h"
 #include "Player/SFPlayerController.h"
+#include "Player/SFLocalPlayer.h"
 
 UE_DISABLE_OPTIMIZATION
 APlayerController* ULocalPlayerBlueprintLibrary::GetServerControllerInClient(const UObject* WorldContext)
@@ -40,6 +41,34 @@ APlayerController* ULocalPlayerBlueprintLibrary::GetServerControllerInClient(con
 
 				return PC;
 			}*/
+		}
+	}
+
+	return nullptr;
+}
+ULocalPlayer* ULocalPlayerBlueprintLibrary::GetSecondLocalPlayerInServer(const UObject* WorldContext)
+{
+	if (WorldContext == nullptr)
+		return nullptr;
+
+	UWorld* World = WorldContext->GetWorld();
+	
+	int index = 0;
+	for (FConstPlayerControllerIterator Iterator = World->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		if (index == 0)
+		{
+			index++;
+			continue;
+		}
+		APlayerController* PlayerController = Iterator->Get();
+		if (PlayerController)
+		{
+			ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(PlayerController->Player);
+			if (LocalPlayer)
+			{
+				return LocalPlayer;
+			}
 		}
 	}
 

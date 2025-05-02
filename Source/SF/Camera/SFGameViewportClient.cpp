@@ -19,6 +19,9 @@ USFGameViewportClient::USFGameViewportClient(const FObjectInitializer& ObjectIni
 	SFSplitscreenInfo[ESFSplitScreenType::SeparateScreen].PlayerData.Add(FPerPlayerSplitscreenData(0.4999f, 1.0f, 0.0f, 0.0f));
 	SFSplitscreenInfo[ESFSplitScreenType::SeparateScreen].PlayerData.Add(FPerPlayerSplitscreenData(0.4999f, 1.0f, 0.5001f, 0.0f));
 
+	SFSplitscreenInfo[ESFSplitScreenType::NestedScreen].PlayerData.Add(FPerPlayerSplitscreenData(1.0f, 1.0f, 0.0f, 0.0f));
+	SFSplitscreenInfo[ESFSplitScreenType::NestedScreen].PlayerData.Add(FPerPlayerSplitscreenData(1.0f, 1.0f, 0.0f, 0.0f));
+
 	SplitscreenType = ESFSplitScreenType::SeparateScreen;
 
 	ElapsedTime = 0.f;

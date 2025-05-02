@@ -39,7 +39,6 @@ ULocalPlayer* USFGameInstance::CreateLocalPlayer(APlayerController* NewPlayerCon
 		NewPlayer = NewObject<ULocalPlayer>(GetEngine(), GetEngine()->LocalPlayerClass);
 		
 		NewPlayer->PlayerController = NewPlayerController;
-
 		if (ASFPlayerController* SFPC = Cast<ASFPlayerController>(NewPlayer->PlayerController))
 		{
 			SFPC->bMainController = false;

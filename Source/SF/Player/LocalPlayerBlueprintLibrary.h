@@ -8,6 +8,7 @@
 
 
 class APlayerController;
+class ULocalPlayer;
 /**
  * 
  */
@@ -19,6 +20,9 @@ class SF_API ULocalPlayerBlueprintLibrary : public UBlueprintFunctionLibrary
 public:
 	UFUNCTION(BlueprintCallable, Category = "PlayerController")
 	static APlayerController* GetServerControllerInClient(const UObject* WorldContext);
+
+	UFUNCTION(BlueprintCallable, Category = "PlayerController")
+	static ULocalPlayer* GetSecondLocalPlayerInServer(const UObject* WorldContext);
 
 	UFUNCTION(BlueprintCallable, Category = "PlayerController")
 	static void ChangeControlType(APlayerController* PlayerController, EControlType NewControlType);

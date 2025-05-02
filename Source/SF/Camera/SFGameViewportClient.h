@@ -15,6 +15,7 @@ enum ESFSplitScreenType : int
 	Cinematic,
 	OneScreen,
 	SeparateScreen,
+	NestedScreen,
 	SplitTypeCount
 };
 
