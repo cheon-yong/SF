@@ -15,7 +15,7 @@ enum ESFSplitScreenType : int
 	Cinematic,
 	OneScreen,
 	SeparateScreen,
-	NestedScreen,
+	OffsetScreen,
 	SplitTypeCount
 };
 
@@ -36,6 +36,10 @@ public:
 	
 	virtual void SwapCameraPosition();
 
+	float GetOffsetX() { return OffsetX; }
+
+	ESFSplitScreenType GetScreenType() { return SplitscreenType; }
+
 	void SetSplitScreenType(ESFSplitScreenType NewSplitScreenType);
 
 protected:
@@ -43,11 +47,14 @@ protected:
 
 protected:
 
+	
 	float ElapsedTime;
 
 	float ChangeDuration;
 
 	bool bChangingScreenSize;
+
+	float OffsetX = 1.f;
 
 	UPROPERTY()
 	TEnumAsByte<ESFSplitScreenType> SplitscreenType;

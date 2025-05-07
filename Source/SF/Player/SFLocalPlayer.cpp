@@ -6,8 +6,10 @@
 #include "IXRTrackingSystem.h"
 #include "IXRCamera.h"
 #include "Camera/CameraComponent.h"
+#include "Camera/SFGameViewportClient.h"
 #include "SceneView.h"
 #include "SceneViewExtension.h"
+#include "Player/SFPlayerController.h"
 #include <Engine/DebugCameraController.h>
 
 #if !UE_BUILD_SHIPPING
@@ -61,9 +63,25 @@ bool USFLocalPlayer::CalcSceneViewInitOptions(
 	//const FMinimalViewInfo& POV = PC->PlayerCameraManager->GetCameraCacheView();
 
 	//float AspectRatio = (float)FullWidth / (float)FullHeight;
-	float OffsetX = 1.f; // -0.5 ~ +0.5 정도 (왼쪽으로 중심 이동)
 
-	ViewInitOptions.ProjectionMatrix.M[2][0] += OffsetX;
+	if (USFGameViewportClient* SFViewport = Cast< USFGameViewportClient>(GetWorld()->GetGameViewport()))
+	{
+		if (SFViewport->GetScreenType() == ESFSplitScreenType::OffsetScreen)
+		{
+			if (ASFPlayerController* SFPC = Cast<ASFPlayerController>(GetPlayerController(GetWorld())))
+			{
+				float OffsetX = SFViewport->GetOffsetX();
+				if (SFPC->bMainController == true)
+				{
+					ViewInitOptions.ProjectionMatrix.M[2][0] += OffsetX;
+				}
+				else
+				{
+					ViewInitOptions.ProjectionMatrix.M[2][0] -= OffsetX;
+				}
+			}
+		}
+	}
 
 	return bResult;
 }
