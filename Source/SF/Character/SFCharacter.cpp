@@ -11,6 +11,7 @@
 #include "Weapon/SFWeaponData.h"
 #include "Widget/HpBar.h"
 #include "Net/UnrealNetwork.h"
+#include <Actor/EffectActor.h>
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -153,6 +154,9 @@ void ASFCharacter::BeginPlay()
 	GetMesh()->SetAnimInstanceClass(DefaultAnimationClass);
 
 	OnHpZero.AddDynamic(this, &ThisClass::OnDeath);
+
+	OnSpawned.AddDynamic(this, &ThisClass::OnSpawn);
+
 }
 
 void ASFCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -303,6 +307,24 @@ void ASFCharacter::OnDamage(uint8 Damage, AActor* InInstigator)
 	if (CurrentHp == 0)
 	{
 		OnHpZero.Broadcast();
+	}
+}
+
+void ASFCharacter::OnSpawn()
+{
+	if (SpawnEffectClass)
+	{
+		FActorSpawnParameters SpawnParams;
+		AActor* SpawnEffect = GetWorld()->SpawnActor<AActor>(SpawnEffectClass,
+			GetMesh()->GetComponentLocation(),
+			GetActorRotation(),
+			SpawnParams
+		);
+
+		if (AEffectActor* SEA = Cast<AEffectActor>(SpawnEffect))
+		{
+			SEA->Burst(this);
+		}
 	}
 }
 

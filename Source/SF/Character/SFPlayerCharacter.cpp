@@ -44,6 +44,8 @@ void ASFPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	SetColor();
+
+	OnSpawned.Broadcast();
 }
 
 void ASFPlayerCharacter::SetColor()

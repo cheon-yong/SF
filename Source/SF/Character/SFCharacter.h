@@ -24,6 +24,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHpChanged, const uint8&, MaxHp, const uint8&, CurrentHp);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHpZero);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSpawn);
 
 
 UENUM(BlueprintType)
@@ -116,7 +117,11 @@ class ASFCharacter : public ACharacter
 
 public:
 	ASFCharacter();
-			
+
+	virtual void BeginPlay() override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	// Weapon
 	void AddWeapon(TSubclassOf<USFWeaponData> WeaponDataClass);
 	void RemoveWeapon(TObjectPtr<USFWeaponData> WeaponData);
@@ -143,6 +148,9 @@ public:
 	virtual void OnDamage(uint8 Damage, AActor* InInstigator);
 
 	UFUNCTION()
+	virtual void OnSpawn();
+
+	UFUNCTION()
 	virtual void OnDeath();
 
 	virtual void SetupCharacterWidget(USFUserWidget* InUserWidget);
@@ -152,6 +160,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnHpZero OnHpZero;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnSpawn OnSpawned;
 
 protected:
 	UFUNCTION(NetMulticast, Unreliable)
@@ -176,10 +187,6 @@ protected:
 	void OnRep_Hp();
 
 	// End OnRep
-
-	virtual void BeginPlay() override;
-
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_MaxHp , EditAnywhere, BlueprintReadWrite, Category = "Stat")
