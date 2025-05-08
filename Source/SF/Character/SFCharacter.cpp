@@ -290,7 +290,7 @@ void ASFCharacter::UseWeaponInternal(float AttackTime)
 }
 
 
-void ASFCharacter::OnDamage(uint8 Damage, AActor* instigator)
+void ASFCharacter::OnDamage(uint8 Damage, AActor* InInstigator)
 {
 	uint8 BeforeHP = CurrentHp;
 	CurrentHp = FMath::Clamp(BeforeHP - Damage, 0, MaxHp);

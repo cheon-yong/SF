@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Character/SFCharacter.h"
 #include "SFPlayerCharacter.generated.h"
 
@@ -40,6 +39,8 @@ protected:
 
 	UFUNCTION()
 	void OnRep_Pitch();
+
+	virtual void OnDeath() override;
 
 public:
 	UPROPERTY(ReplicatedUsing = OnRep_Pitch, VisibleAnywhere, BlueprintReadOnly)

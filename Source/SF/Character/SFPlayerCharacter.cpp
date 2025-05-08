@@ -3,6 +3,7 @@
 
 #include "Character/SFPlayerCharacter.h"
 
+#include "Actor/EffectActor.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -93,4 +94,26 @@ void ASFPlayerCharacter::Server_UpdateAim_Implementation(float NewPitch)
 void ASFPlayerCharacter::OnRep_Pitch()
 {
 	
+}
+
+void ASFPlayerCharacter::OnDeath()
+{
+	if (DeathEffectClass)
+	{
+		FActorSpawnParameters SpawnParams;
+		AActor* DeathEffect = GetWorld()->SpawnActor<AActor>(DeathEffectClass,
+			GetMesh()->GetComponentLocation(),
+			GetActorRotation(),
+			SpawnParams
+		);
+
+		//DeathEffect->SetLifeSpan(0.8f);
+
+		if (AEffectActor* DEA = Cast<AEffectActor>(DeathEffect))
+		{
+			DEA->Burst(this);
+		}
+	}
+
+	//Super::OnDeath();
 }

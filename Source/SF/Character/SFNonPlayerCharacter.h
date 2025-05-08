@@ -52,10 +52,6 @@ public:
 	TObjectPtr<APawn> Target;
 
 protected: 
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Death", Meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<AActor> DeathEffectClass;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<USFUserWidget> HpBarClass;
 

@@ -99,7 +99,6 @@ private:
 	UPROPERTY(NotReplicated)
 	TObjectPtr<AActor> Owner;
 
-
 	friend ASFCharacter;
 };
 
@@ -108,9 +107,6 @@ struct TStructOpsTypeTraits<FInventory> : public TStructOpsTypeTraitsBase2<FInve
 {
 	enum { WithNetDeltaSerializer = true };
 };
-
-
-
 
 
 UCLASS(config=Game)
@@ -143,7 +139,8 @@ public:
 	void Multicast_UseWeapon(float RequestTime);
 	// ~Weapon
 
-	virtual void OnDamage(uint8 Damage, AActor* instigator);
+	UFUNCTION(BlueprintCallable)
+	virtual void OnDamage(uint8 Damage, AActor* InInstigator);
 
 	UFUNCTION()
 	virtual void OnDeath();
@@ -202,5 +199,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	TSubclassOf<UAnimInstance> DefaultAnimationClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Death", Meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AActor> DeathEffectClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn", Meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AActor> SpawnEffectClass;
 };
 
