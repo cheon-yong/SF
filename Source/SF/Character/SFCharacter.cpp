@@ -312,20 +312,7 @@ void ASFCharacter::OnDamage(uint8 Damage, AActor* InInstigator)
 
 void ASFCharacter::OnSpawn()
 {
-	if (SpawnEffectClass)
-	{
-		FActorSpawnParameters SpawnParams;
-		AActor* SpawnEffect = GetWorld()->SpawnActor<AActor>(SpawnEffectClass,
-			GetMesh()->GetComponentLocation(),
-			GetActorRotation(),
-			SpawnParams
-		);
-
-		if (AEffectActor* SEA = Cast<AEffectActor>(SpawnEffect))
-		{
-			SEA->Burst(this);
-		}
-	}
+	CurrentHp = MaxHp;
 }
 
 void ASFCharacter::OnDeath()
@@ -342,4 +329,3 @@ void ASFCharacter::SetupCharacterWidget(USFUserWidget* InUserWidget)
 		OnHpChanged.AddDynamic(HpBarWidget, &UHpBar::UpdateHp);
 	}
 }
-

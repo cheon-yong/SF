@@ -210,7 +210,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Death", Meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AActor> DeathEffectClass;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Death", Meta = (AllowPrivateAccess = "true"))
+	AActor* DeathEffect;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn", Meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AActor> SpawnEffectClass;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Spawn", Meta = (AllowPrivateAccess = "true"))
+	AActor* SpawnEffect;
 };
 

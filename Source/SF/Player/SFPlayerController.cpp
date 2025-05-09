@@ -12,6 +12,7 @@
 #include "Camera/SFGameViewportClient.h"
 #include <EnhancedInputSubsystems.h>
 #include <EnhancedInputComponent.h>
+#include <Character/SFPlayerCharacter.h>
 
 
 ASFPlayerController::ASFPlayerController()
@@ -73,6 +74,16 @@ void ASFPlayerController::SetupInputComponent()
 	BindInputHandler(CurrentInputHandler);
 }
 
+void ASFPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	if (ASFPlayerCharacter* PlayerCharacter = Cast<ASFPlayerCharacter>(InPawn))
+	{
+		PlayerCharacter->OnHpZero.AddDynamic(this, &ThisClass::OnCharacterDeath);
+	}
+}
+
 void ASFPlayerController::ChangeControlType(EControlType NewControlType)
 {
 	TSubclassOf<USFInputHandler> NewInputHandlerClass = InputHandlerClassMap[NewControlType];
@@ -130,6 +141,27 @@ void ASFPlayerController::BindInputHandler(USFInputHandler* InputHandler)
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
+}
+
+void ASFPlayerController::OnCharacterDeath()
+{
+	DisableInput(this);
+
+	GetWorld()->GetTimerManager().SetTimer(SpawnHandle, FTimerDelegate::CreateLambda([this]()
+		{
+			RespawnCharacter();
+		}), RespawnTime, false);
+}
+
+void ASFPlayerController::RespawnCharacter()
+{
+	if (ASFPlayerCharacter* PlayerCharacter = Cast<ASFPlayerCharacter>(GetPawn()))
+	{
+		PlayerCharacter->TeleportTo(SpawnLocation, PlayerCharacter->GetActorRotation());
+		PlayerCharacter->Respawn();
+	}
+
+	EnableInput(this);
 }
 
 void ASFPlayerController::Client_UpdateSecondController_Implementation()

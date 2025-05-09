@@ -122,8 +122,13 @@ void ASFNonPlayerCharacter::OnDeath()
 
 	if (DeathEffectClass)
 	{
+		if (DeathEffect != nullptr)
+		{
+			DeathEffect->Destroy();
+			DeathEffect = nullptr;
+		}
 		FActorSpawnParameters SpawnParams;
-		AActor* DeathEffect = GetWorld()->SpawnActor<AActor>(DeathEffectClass,
+		DeathEffect = GetWorld()->SpawnActor<AActor>(DeathEffectClass,
 			GetMesh()->GetComponentLocation(),
 			GetActorRotation(),
 			SpawnParams

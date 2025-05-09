@@ -39,6 +39,11 @@ void ASFPlayerCharacter::ChangeCameraComponent()
 	
 }
 
+void ASFPlayerCharacter::Respawn()
+{
+	OnSpawned.Broadcast();
+}
+
 void ASFPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -98,12 +103,52 @@ void ASFPlayerCharacter::OnRep_Pitch()
 	
 }
 
+void ASFPlayerCharacter::OnSpawn()
+{
+	Super::OnSpawn();
+
+	if (SpawnEffectClass)
+	{
+		if (DeathEffect)
+		{
+			DeathEffect->Destroy();
+			DeathEffect = nullptr;
+		}
+
+		if (SpawnEffect != nullptr)
+		{
+			SpawnEffect->Destroy();
+			SpawnEffect = nullptr;
+		}
+
+		FActorSpawnParameters SpawnParams;
+		SpawnEffect = GetWorld()->SpawnActor<AActor>(SpawnEffectClass,
+			GetMesh()->GetComponentLocation(),
+			GetActorRotation(),
+			SpawnParams
+		);
+
+		if (AEffectActor* SEA = Cast<AEffectActor>(SpawnEffect))
+		{
+			SEA->Burst(this);
+		}
+	}
+}
+
 void ASFPlayerCharacter::OnDeath()
 {
+	if (HasAuthority() == false)
+		return;
+
 	if (DeathEffectClass)
 	{
 		FActorSpawnParameters SpawnParams;
-		AActor* DeathEffect = GetWorld()->SpawnActor<AActor>(DeathEffectClass,
+		if (DeathEffect != nullptr)
+		{
+			DeathEffect->Destroy();
+			DeathEffect = nullptr;
+		}
+		DeathEffect = GetWorld()->SpawnActor<AActor>(DeathEffectClass,
 			GetMesh()->GetComponentLocation(),
 			GetActorRotation(),
 			SpawnParams

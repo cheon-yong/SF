@@ -29,6 +29,10 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetupInputComponent() override;
 
+	virtual void OnPossess(APawn* InPawn) override;
+
+	void UpdateRespawnLocation(FVector NewLocation) { RespawnLocation = NewLocation; };
+
 	UFUNCTION(BlueprintCallable)
 	void ChangeControlType(EControlType NewControlType);
 	
@@ -47,8 +51,15 @@ public:
 protected:
 	void BindInputHandler(USFInputHandler* InputHandler);
 
+	UFUNCTION()
+	void OnCharacterDeath();
+
+	void RespawnCharacter();
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector RespawnLocation = FVector::Zero();
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TMap<EControlType, TSubclassOf<USFInputHandler>> InputHandlerClassMap;
 
@@ -59,4 +70,11 @@ public:
 	USFInputHandler* CurrentInputHandler;
 
 	bool bMainController = true;
+
+protected:
+	UPROPERTY()
+	FTimerHandle SpawnHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RespawnTime = 1.f;
 };

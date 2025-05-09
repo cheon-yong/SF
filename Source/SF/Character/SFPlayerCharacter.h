@@ -28,6 +28,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ChangeCameraComponent();
 
+	void Respawn();
+
 protected:
 
 	// To add mapping context
@@ -40,6 +42,8 @@ protected:
 	UFUNCTION()
 	void OnRep_Pitch();
 
+	virtual void OnSpawn() override;
+
 	virtual void OnDeath() override;
 
 public:
@@ -50,6 +54,7 @@ public:
 	FVector ToMouseVector;
 
 protected:
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Color, meta = (AllowPrivateAccess = "true"))
 	TArray<FCharacterMaterials> CharacterColorMaterials;
 

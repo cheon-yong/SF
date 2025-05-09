@@ -5,6 +5,9 @@
 #include "GameFramework/Actor.h"
 #include "EffectActor.generated.h"
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFinishedBurst);
+
 UCLASS()
 class SF_API AEffectActor : public AActor
 {
@@ -17,8 +20,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void Burst(AActor* TargetActor);
 		
+	UPROPERTY(BlueprintAssignable)
+	FOnFinishedBurst OnFinishedBurst;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 };
