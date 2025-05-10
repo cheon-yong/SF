@@ -11,6 +11,8 @@
 #include "Camera/CameraComponent.h"
 #include <Net/UnrealNetwork.h>
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/BoxComponent.h"
+#include "Actor/InteractActor.h"
 
 
 ASFPlayerCharacter::ASFPlayerCharacter() 
@@ -30,6 +32,9 @@ ASFPlayerCharacter::ASFPlayerCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
+	InteractBox = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractBox"));
+	InteractBox->SetupAttachment(RootComponent);
+
 	Pitch_SideScroll = 0;
 	ToMouseVector = FVector::Zero();
 }
@@ -44,6 +49,14 @@ void ASFPlayerCharacter::Respawn()
 	OnSpawned.Broadcast();
 }
 
+TArray<AActor*> ASFPlayerCharacter::GetInteractActors()
+{
+	TArray<AActor*> OverlappingActors;
+	InteractBox->GetOverlappingActors(OverlappingActors);
+
+	return OverlappingActors;
+}
+
 void ASFPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -51,6 +64,9 @@ void ASFPlayerCharacter::BeginPlay()
 	SetColor();
 
 	OnSpawned.Broadcast();
+
+	InteractBox->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnInteractBoxBeginOverlap);
+	InteractBox->OnComponentEndOverlap.AddDynamic(this, &ThisClass::OnInteractBoxEndOverlap);
 }
 
 void ASFPlayerCharacter::SetColor()
@@ -163,4 +179,20 @@ void ASFPlayerCharacter::OnDeath()
 	}
 
 	//Super::OnDeath();
+}
+
+void ASFPlayerCharacter::OnInteractBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (AInteractActor* InteractActor = Cast<AInteractActor>(OtherActor))
+	{
+		InteractActor->ShowInteractWidget(true);
+	}
+}
+
+void ASFPlayerCharacter::OnInteractBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (AInteractActor* InteractActor = Cast<AInteractActor>(OtherActor))
+	{
+		InteractActor->ShowInteractWidget(false);
+	}
 }
