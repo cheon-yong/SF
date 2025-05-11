@@ -52,6 +52,21 @@ void ASFPlayerCharacter::Respawn()
 	OnSpawned.Broadcast();
 }
 
+void ASFPlayerCharacter::PlayAnimMontageAndBlockMove(UAnimMontage* MontageToPlay, float PlayRate, FVector StartingPosition, FString StartingSection)
+{
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+
+	GetMesh()->GetAnimInstance()->Montage_Play(MontageToPlay, PlayRate);
+	FOnMontageEnded EndDelegate;
+	
+	EndDelegate.BindLambda([&](UAnimMontage* Montage, bool bInterrupted)
+		{
+			GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+		});
+
+	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, MontageToPlay);
+}
+
 TArray<AActor*> ASFPlayerCharacter::GetInteractActors()
 {
 	TArray<AActor*> OverlappingActors;

@@ -33,6 +33,9 @@ public:
 
 	void Respawn();
 
+	UFUNCTION(BlueprintCallable)
+	void PlayAnimMontageAndBlockMove(UAnimMontage* MontageToPlay, float PlayRate = 1.0f, FVector StartingPosition = FVector(0.f, 0.f, 0.f), FString StartingSection = TEXT("None"));
+
 	TArray<AActor*> GetInteractActors();
 
 protected:
