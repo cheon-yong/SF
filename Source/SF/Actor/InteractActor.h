@@ -8,7 +8,7 @@
 class UStaticMeshComponent;
 class USFWidgetComponent;
 
-UCLASS()
+UCLASS(Blueprintable, BlueprintType)
 class AInteractActor : public AActor
 {
 	GENERATED_BODY()
