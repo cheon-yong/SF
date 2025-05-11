@@ -13,6 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/BoxComponent.h"
 #include "Actor/InteractActor.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 
 
 ASFPlayerCharacter::ASFPlayerCharacter() 
@@ -34,6 +35,8 @@ ASFPlayerCharacter::ASFPlayerCharacter()
 
 	InteractBox = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractBox"));
 	InteractBox->SetupAttachment(RootComponent);
+
+	PhysicsHandleComponent = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("PhysicsHandle"));
 
 	Pitch_SideScroll = 0;
 	ToMouseVector = FVector::Zero();

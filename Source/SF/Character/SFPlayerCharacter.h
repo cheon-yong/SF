@@ -6,6 +6,7 @@
 #include "SFPlayerCharacter.generated.h"
 
 class UBoxComponent;
+class UPhysicsHandleComponent;
 
 /**
  * 
@@ -81,4 +82,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UCameraComponent> SplitCameraComponentClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UPhysicsHandleComponent> PhysicsHandleComponent;
 };
