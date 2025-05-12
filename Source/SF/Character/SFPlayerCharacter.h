@@ -36,6 +36,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void PlayAnimMontageAndBlockMove(UAnimMontage* MontageToPlay, float PlayRate = 1.0f, FVector StartingPosition = FVector(0.f, 0.f, 0.f), FString StartingSection = TEXT("None"));
 
+	UFUNCTION(Client, Unreliable)
+	void Client_PlayAnimMontageAndBlockMove(UAnimMontage* MontageToPlay, float PlayRate = 1.0f, FVector StartingPosition = FVector(0.f, 0.f, 0.f), FString StartingSection = TEXT("None"));
+
 	TArray<AActor*> GetInteractActors();
 
 protected:
@@ -59,6 +62,8 @@ protected:
 
 	UFUNCTION()
 	void OnInteractBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	void PlayAnimMontageAndBlockMove_Internal(UAnimMontage* MontageToPlay, float PlayRate = 1.0f, FVector StartingPosition = FVector(0.f, 0.f, 0.f), FString StartingSection = TEXT("None"));
 
 public:
 	UPROPERTY(ReplicatedUsing = OnRep_Pitch, VisibleAnywhere, BlueprintReadOnly)

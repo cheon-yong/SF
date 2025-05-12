@@ -32,3 +32,8 @@ void AInteractActor::BeginPlay()
 	WidgetComp->SetVisibility(false);
 }
 
+void AInteractActor::CallInteractDelegate(AActor* InteractrPawn, bool bSuccess)
+{
+	OnInteract.Broadcast(InteractrPawn, bSuccess);
+}
+

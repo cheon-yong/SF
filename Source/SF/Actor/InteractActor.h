@@ -8,6 +8,8 @@
 class UStaticMeshComponent;
 class USFWidgetComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnInteract, AActor*, InteractActor, bool, Success);
+
 UCLASS(Blueprintable, BlueprintType)
 class AInteractActor : public AActor
 {
@@ -30,7 +32,13 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	
+	UFUNCTION(BlueprintCallable)
+	void CallInteractDelegate(AActor* InteractrPawn, bool bSuccess);
+
+public:
+	UPROPERTY(BlueprintAssignable)
+	FOnInteract OnInteract;
+		
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;

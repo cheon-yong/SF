@@ -54,11 +54,28 @@ void ASFPlayerCharacter::Respawn()
 
 void ASFPlayerCharacter::PlayAnimMontageAndBlockMove(UAnimMontage* MontageToPlay, float PlayRate, FVector StartingPosition, FString StartingSection)
 {
+	if (HasAuthority())
+	{
+		PlayAnimMontageAndBlockMove_Internal();
+	}
+	else
+	{
+		Client_PlayAnimMontageAndBlockMove(MontageToPlay, PlayRate, StartingPosition, StartingSection);
+	}
+}
+
+void ASFPlayerCharacter::Client_PlayAnimMontageAndBlockMove_Implementation(UAnimMontage* MontageToPlay, float PlayRate, FVector StartingPosition, FString StartingSection)
+{
+	PlayAnimMontageAndBlockMove_Internal();
+}
+
+void ASFPlayerCharacter::PlayAnimMontageAndBlockMove_Internal(UAnimMontage* MontageToPlay, float PlayRate, FVector StartingPosition, FString StartingSection)
+{
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 
 	GetMesh()->GetAnimInstance()->Montage_Play(MontageToPlay, PlayRate);
 	FOnMontageEnded EndDelegate;
-	
+
 	EndDelegate.BindLambda([&](UAnimMontage* Montage, bool bInterrupted)
 		{
 			GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
