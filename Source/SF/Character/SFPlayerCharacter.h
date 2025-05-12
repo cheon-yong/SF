@@ -33,11 +33,17 @@ public:
 
 	void Respawn();
 
+	void Interact();
+
+
 	UFUNCTION(BlueprintCallable)
 	void PlayAnimMontageAndBlockMove(UAnimMontage* MontageToPlay, float PlayRate = 1.0f, FVector StartingPosition = FVector(0.f, 0.f, 0.f), FString StartingSection = TEXT("None"));
 
-	UFUNCTION(Client, Unreliable)
-	void Client_PlayAnimMontageAndBlockMove(UAnimMontage* MontageToPlay, float PlayRate = 1.0f, FVector StartingPosition = FVector(0.f, 0.f, 0.f), FString StartingSection = TEXT("None"));
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multi_PlayAnimMontageAndBlockMove(UAnimMontage* MontageToPlay, float PlayRate = 1.0f, FVector StartingPosition = FVector(0.f, 0.f, 0.f), const FString& StartingSection = TEXT("None"));
+
+	UFUNCTION(Server, Unreliable)
+	void Server_PlayAnimMontageAndBlockMove(UAnimMontage* MontageToPlay, float PlayRate = 1.0f, FVector StartingPosition = FVector(0.f, 0.f, 0.f), const FString& StartingSection = TEXT("None"));
 
 	TArray<AActor*> GetInteractActors();
 
@@ -64,6 +70,11 @@ protected:
 	void OnInteractBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	void PlayAnimMontageAndBlockMove_Internal(UAnimMontage* MontageToPlay, float PlayRate = 1.0f, FVector StartingPosition = FVector(0.f, 0.f, 0.f), FString StartingSection = TEXT("None"));
+
+	void Interact_Internal();
+
+	UFUNCTION(Server, Unreliable)
+	void Server_Interact();
 
 public:
 	UPROPERTY(ReplicatedUsing = OnRep_Pitch, VisibleAnywhere, BlueprintReadOnly)

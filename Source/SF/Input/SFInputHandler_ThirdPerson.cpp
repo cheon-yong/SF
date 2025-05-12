@@ -81,29 +81,8 @@ void USFInputHandler_ThirdPerson::Interact()
 {
 	if (ASFPlayerCharacter* SFPlayerCharacter = Cast<ASFPlayerCharacter>(GetCharacter()))
 	{
-		TArray<AActor*> Actors = SFPlayerCharacter->GetInteractActors();
+		SFPlayerCharacter->Interact();
 
-		AInteractActor* PrimaryActor = nullptr;
-		float MinDist = FLT_MAX;
-		for (AActor* Actor : Actors)
-		{
-			if (AInteractActor* IA = Cast<AInteractActor>(Actor))
-			{
-				float Dist = IA->GetDistanceTo(SFPlayerCharacter);
-				if (Dist < MinDist)
-				{
-					PrimaryActor = IA;
-					MinDist = Dist;
-				}
-			}
-		}
-
-		if (PrimaryActor == nullptr)
-		{
-			return;
-		}
-
-		PrimaryActor->BeginInteract(SFPlayerCharacter);
 	}
 }
 

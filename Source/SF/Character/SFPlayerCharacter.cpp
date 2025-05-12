@@ -52,21 +52,38 @@ void ASFPlayerCharacter::Respawn()
 	OnSpawned.Broadcast();
 }
 
+void ASFPlayerCharacter::Interact()
+{
+
+	if (!HasAuthority())
+	{
+		Server_Interact();
+		return;
+	}
+
+	Interact_Internal();
+}
+
 void ASFPlayerCharacter::PlayAnimMontageAndBlockMove(UAnimMontage* MontageToPlay, float PlayRate, FVector StartingPosition, FString StartingSection)
 {
 	if (HasAuthority())
 	{
-		PlayAnimMontageAndBlockMove_Internal();
+		Multi_PlayAnimMontageAndBlockMove(MontageToPlay, PlayRate, StartingPosition, StartingSection);
 	}
 	else
 	{
-		Client_PlayAnimMontageAndBlockMove(MontageToPlay, PlayRate, StartingPosition, StartingSection);
+		Server_PlayAnimMontageAndBlockMove(MontageToPlay, PlayRate, StartingPosition, StartingSection);
 	}
 }
 
-void ASFPlayerCharacter::Client_PlayAnimMontageAndBlockMove_Implementation(UAnimMontage* MontageToPlay, float PlayRate, FVector StartingPosition, FString StartingSection)
+void ASFPlayerCharacter::Multi_PlayAnimMontageAndBlockMove_Implementation(UAnimMontage* MontageToPlay, float PlayRate, FVector StartingPosition, const FString& StartingSection)
 {
-	PlayAnimMontageAndBlockMove_Internal();
+	PlayAnimMontageAndBlockMove_Internal(MontageToPlay, PlayRate, StartingPosition, StartingSection);
+}
+
+void ASFPlayerCharacter::Server_PlayAnimMontageAndBlockMove_Implementation(UAnimMontage* MontageToPlay, float PlayRate, FVector StartingPosition, const FString& StartingSection)
+{
+	Multi_PlayAnimMontageAndBlockMove(MontageToPlay, PlayRate, StartingPosition, StartingSection);
 }
 
 void ASFPlayerCharacter::PlayAnimMontageAndBlockMove_Internal(UAnimMontage* MontageToPlay, float PlayRate, FVector StartingPosition, FString StartingSection)
@@ -82,6 +99,38 @@ void ASFPlayerCharacter::PlayAnimMontageAndBlockMove_Internal(UAnimMontage* Mont
 		});
 
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, MontageToPlay);
+}
+
+void ASFPlayerCharacter::Interact_Internal()
+{
+	TArray<AActor*> Actors = GetInteractActors();
+
+	AInteractActor* PrimaryActor = nullptr;
+	float MinDist = FLT_MAX;
+	for (AActor* Actor : Actors)
+	{
+		if (AInteractActor* IA = Cast<AInteractActor>(Actor))
+		{
+			float Dist = IA->GetDistanceTo(this);
+			if (Dist < MinDist)
+			{
+				PrimaryActor = IA;
+				MinDist = Dist;
+			}
+		}
+	}
+
+	if (PrimaryActor == nullptr)
+	{
+		return;
+	}
+
+	PrimaryActor->BeginInteract(this);
+}
+
+void ASFPlayerCharacter::Server_Interact_Implementation()
+{
+	Interact_Internal();
 }
 
 TArray<AActor*> ASFPlayerCharacter::GetInteractActors()
@@ -220,7 +269,10 @@ void ASFPlayerCharacter::OnInteractBoxBeginOverlap(UPrimitiveComponent* Overlapp
 {
 	if (AInteractActor* InteractActor = Cast<AInteractActor>(OtherActor))
 	{
-		InteractActor->ShowInteractWidget(true);
+		if (IsLocallyControlled())
+		{
+			InteractActor->ShowInteractWidget(true);
+		}
 	}
 }
 
@@ -228,6 +280,9 @@ void ASFPlayerCharacter::OnInteractBoxEndOverlap(UPrimitiveComponent* Overlapped
 {
 	if (AInteractActor* InteractActor = Cast<AInteractActor>(OtherActor))
 	{
-		InteractActor->ShowInteractWidget(false);
+		if (IsLocallyControlled())
+		{
+			InteractActor->ShowInteractWidget(false);
+		}
 	}
 }
