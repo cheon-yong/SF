@@ -17,6 +17,8 @@ AInteractActor::AInteractActor()
 
 	WidgetComp = CreateDefaultSubobject<USFWidgetComponent>(TEXT("Widget"));
 	WidgetComp->SetupAttachment(RootComponent);
+
+	SetReplicates(true);
 }
 
 void AInteractActor::ShowInteractWidget(bool bOn)
