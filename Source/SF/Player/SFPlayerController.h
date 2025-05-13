@@ -31,6 +31,7 @@ public:
 
 	virtual void OnPossess(APawn* InPawn) override;
 
+	UFUNCTION(BlueprintCallable)
 	void UpdateRespawnLocation(FVector NewLocation) { RespawnLocation = NewLocation; };
 
 	UFUNCTION(BlueprintCallable)
