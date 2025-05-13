@@ -164,23 +164,14 @@ void ASFPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	Inventory.SetOwner(this);
+
 	SetColor();
 
 	OnSpawned.Broadcast();
 
 	InteractBox->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnInteractBoxBeginOverlap);
 	InteractBox->OnComponentEndOverlap.AddDynamic(this, &ThisClass::OnInteractBoxEndOverlap);
-
-	if (HasAuthority())
-	{
-		GetWorldTimerManager().SetTimer(
-			CameraDebugTimerHandle,
-			this,
-			&ASFPlayerCharacter::LogCameraState,
-			1.0f, // 1초 간격
-			true  // 반복 호출
-		);
-	}
 }
 
 void ASFPlayerCharacter::SetColor()

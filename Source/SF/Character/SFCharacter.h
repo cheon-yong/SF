@@ -79,6 +79,8 @@ struct FInventory : public FFastArraySerializer
 
 public:
 
+	void SetOwner(AActor* InOwner) { Owner = InOwner; }
+
 	//~FFastArraySerializer contract
 	void PreReplicatedRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize);
 	void PostReplicatedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize);
