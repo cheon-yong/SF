@@ -47,6 +47,14 @@ public:
 
 	TArray<AActor*> GetInteractActors();
 
+	void WallJump(UAnimMontage* WallJumpMontage);
+
+	void ResetOption();
+
+	void SetSideOption(FRotator TargetRotationRate);
+
+	void PlayAnimMontage(UAnimMontage* Montage);
+
 protected:
 
 	// To add mapping context
@@ -75,6 +83,29 @@ protected:
 
 	UFUNCTION(Server, Unreliable)
 	void Server_Interact();
+
+	void WallJump_Internal(UAnimMontage* WallJumpMontage);
+
+	UFUNCTION(Server, Unreliable)
+	void Server_WallJump(UAnimMontage* WallJumpMontage);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_ResetOption();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ResetOption();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_SetSideOption(FRotator TargetRotationRate);
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetSideOption(FRotator TargetRotationRate);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multi_PlayAnimMontage(UAnimMontage* Montage);
+
+	UFUNCTION(Server, Unreliable)
+	void Server_PlayAnimMontage(UAnimMontage* Montage);
 
 public:
 	UPROPERTY(ReplicatedUsing = OnRep_Pitch, VisibleAnywhere, BlueprintReadOnly)
@@ -114,4 +145,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UPhysicsHandleComponent> PhysicsHandleComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FRotator OriginRate;
 };

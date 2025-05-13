@@ -11,6 +11,7 @@
 #include "Camera/CameraComponent.h"
 #include <Net/UnrealNetwork.h>
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/BoxComponent.h"
 #include "Actor/InteractActor.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
@@ -126,6 +127,104 @@ void ASFPlayerCharacter::Interact_Internal()
 	}
 
 	PrimaryActor->BeginInteract(this);
+}
+
+void ASFPlayerCharacter::WallJump(UAnimMontage* WallJumpMontage)
+{
+	if (HasAuthority())
+	{
+		WallJump_Internal(WallJumpMontage);
+		return;
+	}
+
+	Server_WallJump(WallJumpMontage);
+}
+
+void ASFPlayerCharacter::ResetOption()
+{
+	if (HasAuthority())
+	{
+		GetCharacterMovement()->RotationRate = OriginRate;
+		Multi_ResetOption();
+		return;
+	}
+
+	Server_ResetOption();
+}
+
+void ASFPlayerCharacter::SetSideOption(FRotator TargetRotationRate)
+{
+	if (HasAuthority())
+	{
+		OriginRate = GetCharacterMovement()->RotationRate;
+		GetCharacterMovement()->RotationRate = TargetRotationRate;
+
+		Multi_SetSideOption(TargetRotationRate);
+		return;
+	}
+
+	Server_SetSideOption(TargetRotationRate);
+}
+
+void ASFPlayerCharacter::PlayAnimMontage(UAnimMontage* Montage)
+{
+	if (HasAuthority())
+	{
+		Multi_PlayAnimMontage(Montage);
+		return;
+	}
+
+	Server_PlayAnimMontage(Montage);
+}
+
+void ASFPlayerCharacter::WallJump_Internal(UAnimMontage* WallJumpMontage)
+{
+	FVector Forward = GetActorForwardVector();
+	FVector LaunchDirection = -Forward; // 벽의 반대 방향
+	LaunchDirection.Z = 1.5f; // 위로도 튕기게
+
+	FVector LaunchVelocity = LaunchDirection * 600.0f; // 속도 조절
+
+	PlayAnimMontage(WallJumpMontage);
+
+	LaunchCharacter(LaunchVelocity, true, true);
+}
+
+void ASFPlayerCharacter::Multi_ResetOption_Implementation()
+{
+	GetMesh()->SetConstraintMode(EDOFMode::Type::None);
+	GetCapsuleComponent()->SetConstraintMode(EDOFMode::Type::None);
+}
+
+void ASFPlayerCharacter::Server_ResetOption_Implementation()
+{
+	Multi_ResetOption();
+}
+
+void ASFPlayerCharacter::Multi_SetSideOption_Implementation(FRotator TargetRotationRate)
+{
+	GetMesh()->SetConstraintMode(EDOFMode::Type::XZPlane);
+	GetCapsuleComponent()->SetConstraintMode(EDOFMode::Type::XZPlane);
+}
+
+void ASFPlayerCharacter::Multi_PlayAnimMontage_Implementation(UAnimMontage* Montage)
+{
+	GetMesh()->GetAnimInstance()->Montage_Play(Montage);
+}
+
+void ASFPlayerCharacter::Server_PlayAnimMontage_Implementation(UAnimMontage* Montage)
+{
+	PlayAnimMontage(Montage);
+}
+
+void ASFPlayerCharacter::Server_SetSideOption_Implementation(FRotator TargetRotationRate)
+{
+	Multi_SetSideOption(TargetRotationRate);
+}
+
+void ASFPlayerCharacter::Server_WallJump_Implementation(UAnimMontage* WallJumpMontage)
+{
+	WallJump_Internal(WallJumpMontage);
 }
 
 void ASFPlayerCharacter::LogCameraState()

@@ -7,12 +7,14 @@
 #include "Player/SFPlayerState.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
+#include "GameFramework/PlayerStart.h"
 #include "Character/SFCharacter.h"
 #include "Player/SFLocalPlayer.h"
 #include "Camera/SFGameViewportClient.h"
 #include <EnhancedInputSubsystems.h>
 #include <EnhancedInputComponent.h>
 #include <Character/SFPlayerCharacter.h>
+#include "EngineUtils.h"
 
 
 ASFPlayerController::ASFPlayerController()
@@ -155,13 +157,40 @@ void ASFPlayerController::OnCharacterDeath()
 
 void ASFPlayerController::RespawnCharacter()
 {
+	if (HasAuthority())
+	{
+		Respawn_Internal();
+		return;
+	}
+	
+	Server_Respawn();
+	EnableInput(this);
+}
+
+void ASFPlayerController::Respawn_Internal()
+{
 	if (ASFPlayerCharacter* PlayerCharacter = Cast<ASFPlayerCharacter>(GetPawn()))
 	{
-		PlayerCharacter->TeleportTo(SpawnLocation, PlayerCharacter->GetActorRotation());
-		PlayerCharacter->Respawn();
-	}
+		FVector SpawnLoc = RespawnLocation;
+		if (SpawnLoc == FVector::Zero())
+		{
+			for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It)
+			{
+				APlayerStart* StartPoint = *It;
+				SpawnLoc = StartPoint->GetActorLocation();
+			}
+		}
 
-	EnableInput(this);
+		PlayerCharacter->TeleportTo(SpawnLoc, PlayerCharacter->GetActorRotation());
+		PlayerCharacter->Respawn();
+
+		EnableInput(this);
+	}
+}
+
+void ASFPlayerController::Server_Respawn_Implementation()
+{
+	Respawn_Internal();
 }
 
 void ASFPlayerController::Client_UpdateSecondController_Implementation()

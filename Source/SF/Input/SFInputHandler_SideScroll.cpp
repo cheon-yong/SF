@@ -38,17 +38,18 @@ void USFInputHandler_SideScroll::Bind(ASFPlayerController* PlayerController, UEn
 	// Shoot 
 	EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &ThisClass::Shoot);
 
-
-
-	OriginRate = GetCharacter()->GetCharacterMovement()->RotationRate;
-
-	GetCharacter()->GetCharacterMovement()->RotationRate = TargetRotationRate;
-	GetCharacter()->GetCapsuleComponent()->SetConstraintMode(EDOFMode::Type::XZPlane);
+	if (ASFPlayerCharacter* SFCharacter = Cast<ASFPlayerCharacter>(GetCharacter()))
+	{
+		SFCharacter->SetSideOption(TargetRotationRate);
+	}
 }
 
 void USFInputHandler_SideScroll::Unbind()
 {
-	GetCharacter()->GetCharacterMovement()->RotationRate = OriginRate;
+	if (ASFPlayerCharacter* SFCharacter = Cast<ASFPlayerCharacter>(GetCharacter()))
+	{
+		SFCharacter->ResetOption();
+	}
 
 	Super::Unbind();
 }
@@ -245,17 +246,10 @@ void USFInputHandler_SideScroll::Jump()
 
 void USFInputHandler_SideScroll::WallJump()
 {
-	FVector Forward = GetCharacter()->GetActorForwardVector();
-	FVector LaunchDirection = -Forward; // 벽의 반대 방향
-	LaunchDirection.Z = 1.0f; // 위로도 튕기게
-
-	FVector LaunchVelocity = LaunchDirection * 600.0f; // 속도 조절
-
-	if (WallJumpMontage)
-		GetCharacter()->GetMesh()->GetAnimInstance()->Montage_Play(WallJumpMontage);
-
-	GetCharacter()->LaunchCharacter(LaunchVelocity, true, true);
-	//GetCharacter()->GetMesh()->PlayAni
+	if (ASFPlayerCharacter* ControlledCharacter = Cast<ASFPlayerCharacter>(GetCharacter()))
+	{
+		ControlledCharacter->WallJump(WallJumpMontage);
+	}
 }
 
 bool USFInputHandler_SideScroll::WallInFront()

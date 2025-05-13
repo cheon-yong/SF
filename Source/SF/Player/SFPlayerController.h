@@ -56,6 +56,10 @@ protected:
 	void OnCharacterDeath();
 
 	void RespawnCharacter();
+	void Respawn_Internal();
+
+	UFUNCTION(Server, Reliable)
+	void Server_Respawn();
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
