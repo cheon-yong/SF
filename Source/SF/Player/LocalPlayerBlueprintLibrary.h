@@ -25,5 +25,8 @@ public:
 	static ULocalPlayer* GetSecondLocalPlayerInServer(const UObject* WorldContext);
 
 	UFUNCTION(BlueprintCallable, Category = "PlayerController")
+	static APlayerController* GetSecondPlayerControllerInServer(const UObject* WorldContext);
+
+	UFUNCTION(BlueprintCallable, Category = "PlayerController")
 	static void ChangeControlType(APlayerController* PlayerController, EControlType NewControlType);
 };

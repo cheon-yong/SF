@@ -42,7 +42,22 @@ ULocalPlayer* USFGameInstance::CreateLocalPlayer(APlayerController* NewPlayerCon
 		if (ASFPlayerController* SFPC = Cast<ASFPlayerController>(NewPlayer->PlayerController))
 		{
 			SFPC->bMainController = false;
+			if (SFPC->PlayerCameraManager)
+			{
+				const FMinimalViewInfo& POV = SFPC->PlayerCameraManager->GetCameraCachePOV();
+				
+				UE_LOG(LogTemp, Warning, TEXT("=== Camera State ==="));
+				UE_LOG(LogTemp, Warning, TEXT("Location: %s"), *POV.Location.ToString());
+				UE_LOG(LogTemp, Warning, TEXT("Rotation: %s"), *POV.Rotation.ToString());
+				UE_LOG(LogTemp, Warning, TEXT("FOV: %f"), POV.FOV);
+				UE_LOG(LogTemp, Warning, TEXT("DefaultAspectRatio: %f"), SFPC->PlayerCameraManager->DefaultAspectRatio);
+				UE_LOG(LogTemp, Warning, TEXT("AspectRatio: %f"), POV.AspectRatio);
+				UE_LOG(LogTemp, Warning, TEXT("BlendWeight: %f"), POV.PostProcessBlendWeight);
+				UE_LOG(LogTemp, Warning, TEXT("=== End Camera State ==="));
+			}
 		}
+
+		NewPlayer->PlayerController->PlayerCameraManager->DefaultAspectRatio = 1.777778f;
 	
 		InsertIndex = AddLocalPlayer(NewPlayer, UserId);
 		UWorld* CurrentWorld = GetWorld();
@@ -50,7 +65,7 @@ ULocalPlayer* USFGameInstance::CreateLocalPlayer(APlayerController* NewPlayerCon
 		{
 			if (CurrentWorld->GetNetMode() != NM_Client)
 			{
-				
+
 			}
 			else
 			{

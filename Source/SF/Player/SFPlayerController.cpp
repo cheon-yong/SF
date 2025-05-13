@@ -200,7 +200,7 @@ void ASFPlayerController::Server_DeleteSecondPawn_Implementation()
 	for (FConstPlayerControllerIterator PCIt = GetWorld()->GetPlayerControllerIterator(); PCIt; ++PCIt)
 	{
 		APlayerController* PC = PCIt->Get();
-		if (PC->IsLocalController())
+		if (PC->IsLocalController() && NewViewTarget == nullptr)
 		{
 			NewViewTarget = PC->GetViewTarget();
 			continue;

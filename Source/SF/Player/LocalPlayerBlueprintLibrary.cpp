@@ -7,7 +7,6 @@
 #include "Player/SFPlayerController.h"
 #include "Player/SFLocalPlayer.h"
 
-UE_DISABLE_OPTIMIZATION
 APlayerController* ULocalPlayerBlueprintLibrary::GetServerControllerInClient(const UObject* WorldContext)
 {
 
@@ -46,6 +45,7 @@ APlayerController* ULocalPlayerBlueprintLibrary::GetServerControllerInClient(con
 
 	return nullptr;
 }
+
 ULocalPlayer* ULocalPlayerBlueprintLibrary::GetSecondLocalPlayerInServer(const UObject* WorldContext)
 {
 	if (WorldContext == nullptr)
@@ -74,7 +74,36 @@ ULocalPlayer* ULocalPlayerBlueprintLibrary::GetSecondLocalPlayerInServer(const U
 
 	return nullptr;
 }
-UE_ENABLE_OPTIMIZATION
+APlayerController* ULocalPlayerBlueprintLibrary::GetSecondPlayerControllerInServer(const UObject* WorldContext)
+{
+	if (WorldContext == nullptr)
+		return nullptr;
+
+	UWorld* World = WorldContext->GetWorld();
+	if (World->GetNetMode() == ENetMode::NM_Client)
+	{
+		return nullptr;
+	}
+	for (FConstPlayerControllerIterator Iterator = World->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		if (ASFPlayerController* SFPC = Cast<ASFPlayerController>(Iterator->Get()))
+		{
+			if (!SFPC->IsLocalController())
+			{
+				continue;
+			}
+
+			if (SFPC->bMainController == true)
+			{
+				continue;
+			}
+
+			return SFPC;
+		}
+	}
+
+	return nullptr;
+}
 
 void ULocalPlayerBlueprintLibrary::ChangeControlType(APlayerController* InPlayerController, EControlType NewControlType)
 {

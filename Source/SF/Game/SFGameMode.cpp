@@ -4,6 +4,7 @@
 #include "Character/SFCharacter.h"
 #include "GameFramework/PlayerController.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Player/SFPlayerController.h"
 #include "Game/SFGameInstance.h"
 
 ASFGameMode::ASFGameMode()
@@ -28,12 +29,24 @@ void ASFGameMode::PostLogin(APlayerController* NewPlayer)
 	if (NewPlayer->IsLocalController())
 		return;
 
-	if (USFGameInstance* SFGameInstance = Cast<USFGameInstance>(GetGameInstance()))
+	if (UGameInstance* GameInstance = GetGameInstance())
 	{
-		FString Error;
-		SFGameInstance->CreateLocalPlayer(NewPlayer, Error);
-		//SFGameInstance->CreateLocalPlayer(NewPlayer->PlayerCameraManager, Error);
+		if (GameInstance->GetNumLocalPlayers() < 2)
+		{
+			FString Error;
+			//SFGameInstance->CreateLocalPlayer(NewPlayer, Error);
+			//SFGameInstance->CreateLocalPlayer(NewPlayer->PlayerCameraManager, Error);
+			int32 NewId = GameInstance->GetLocalPlayerByIndex(0)->GetControllerId() + 1;
+
+			ULocalPlayer* EmptyLocalPlayer = GameInstance->CreateLocalPlayer(NewId, Error, true);
+			if (ASFPlayerController* SFPC = Cast<ASFPlayerController>(EmptyLocalPlayer->GetPlayerController(GetWorld())))
+			{
+				SFPC->bMainController = false;
+				ACharacter* EmptyChar = SFPC->GetCharacter();
+				GetWorld()->DestroyActor(EmptyChar);
+				SFPC->SetViewTarget(NewPlayer->GetPawn());
+			}
+		}
 	}
-	
 }
 

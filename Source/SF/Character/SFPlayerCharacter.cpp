@@ -128,6 +128,25 @@ void ASFPlayerCharacter::Interact_Internal()
 	PrimaryActor->BeginInteract(this);
 }
 
+void ASFPlayerCharacter::LogCameraState()
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		if (PC->PlayerCameraManager)
+		{
+			const FMinimalViewInfo& POV = PC->PlayerCameraManager->GetCameraCachePOV();
+
+			UE_LOG(LogTemp, Warning, TEXT("=== Camera State ==="));
+			UE_LOG(LogTemp, Warning, TEXT("Name: %s"), *GetName());
+			UE_LOG(LogTemp, Warning, TEXT("Location: %s"), *POV.Location.ToString());
+			UE_LOG(LogTemp, Warning, TEXT("Rotation: %s"), *POV.Rotation.ToString());
+			UE_LOG(LogTemp, Warning, TEXT("FOV: %f"), POV.FOV);
+			UE_LOG(LogTemp, Warning, TEXT("AspectRatio: %f"), POV.AspectRatio);
+			UE_LOG(LogTemp, Warning, TEXT("BlendWeight: %f"), POV.PostProcessBlendWeight);
+		}
+	}
+}
+
 void ASFPlayerCharacter::Server_Interact_Implementation()
 {
 	Interact_Internal();
@@ -151,6 +170,17 @@ void ASFPlayerCharacter::BeginPlay()
 
 	InteractBox->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnInteractBoxBeginOverlap);
 	InteractBox->OnComponentEndOverlap.AddDynamic(this, &ThisClass::OnInteractBoxEndOverlap);
+
+	if (HasAuthority())
+	{
+		GetWorldTimerManager().SetTimer(
+			CameraDebugTimerHandle,
+			this,
+			&ASFPlayerCharacter::LogCameraState,
+			1.0f, // 1초 간격
+			true  // 반복 호출
+		);
+	}
 }
 
 void ASFPlayerCharacter::SetColor()

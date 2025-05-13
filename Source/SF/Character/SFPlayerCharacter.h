@@ -83,6 +83,16 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector ToMouseVector;
 
+
+	// Debug
+	// MyPlayerController.h 또는 원하는 클래스에 추가
+	FTimerHandle CameraDebugTimerHandle;
+
+	UFUNCTION()
+	void LogCameraState();
+	// ~ Debug
+
+
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interact, meta = (AllowPrivateAccess = "true"))
