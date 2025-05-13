@@ -38,6 +38,7 @@ ASFProjectile::ASFProjectile()
 	SetReplicateMovement(false);
 }
 
+UE_DISABLE_OPTIMIZATION
 void ASFProjectile::OnBeginHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	// Only add impulse and destroy projectile if we hit a physics
@@ -53,7 +54,11 @@ void ASFProjectile::OnBeginHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 		}
 
 		OnHit.Broadcast();
-		Destroy();
+
+		GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([&]()
+			{
+				Destroy();
+			}));
 	}
 }
-
+UE_DISABLE_OPTIMIZATION
