@@ -8,6 +8,7 @@
 #include "Components/SphereComponent.h"
 #include <AIController.h>
 #include <BehaviorTree/BehaviorTreeComponent.h>
+#include <Net/UnrealNetwork.h>
 
 // Sets default values
 ASFNonPlayerCharacter::ASFNonPlayerCharacter()
@@ -35,6 +36,14 @@ void ASFNonPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 }
+
+void ASFNonPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, Target);
+}
+
 
 void ASFNonPlayerCharacter::OnAttackEnd(UAnimMontage* Montage, bool bInterrupted)
 {
@@ -95,6 +104,22 @@ void ASFNonPlayerCharacter::Multi_AttackByAI_Implementation()
 }
 
 void ASFNonPlayerCharacter::CreateProjectile()
+{
+	if (HasAuthority())
+	{
+		Multi_CreateProjectile();
+		return;
+	}
+
+	Server_CreateProjectile();
+}
+
+void ASFNonPlayerCharacter::Server_CreateProjectile_Implementation()
+{
+	Multi_CreateProjectile();
+}
+
+void ASFNonPlayerCharacter::Multi_CreateProjectile_Implementation()
 {
 	if (ProjectileClass)
 	{

@@ -49,6 +49,14 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(Server, Unreliable)
+	virtual void Server_CreateProjectile();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	virtual void Multi_CreateProjectile();
+
 	UFUNCTION()
 	void OnAttackEnd(UAnimMontage* Montage, bool bInterrupted);
 
@@ -58,7 +66,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebug = false;
 
-	UPROPERTY(VisibleAnywhere	, BlueprintReadWrite, Category = "Attack")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Attack")
 	TObjectPtr<APawn> Target;
 
 protected: 
