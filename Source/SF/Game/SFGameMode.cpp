@@ -6,6 +6,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Player/SFPlayerController.h"
 #include "Game/SFGameInstance.h"
+#include "Camera/ViewportBlueprintFunctionLibrary.h"
 
 ASFGameMode::ASFGameMode()
 {
@@ -45,6 +46,8 @@ void ASFGameMode::PostLogin(APlayerController* NewPlayer)
 				ACharacter* EmptyChar = SFPC->GetCharacter();
 				GetWorld()->DestroyActor(EmptyChar);
 				SFPC->SetViewTarget(NewPlayer->GetPawn());
+
+				UViewportBlueprintFunctionLibrary::SetSplitScreenType(ESFSplitScreenType::SeparateScreen);
 			}
 		}
 	}

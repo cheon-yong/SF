@@ -218,6 +218,7 @@ void ASFPlayerController::Client_UpdateSecondController_Implementation()
 		if (USFGameViewportClient* SFGameViewportClient = Cast<USFGameViewportClient>(GameInstance->GetGameViewportClient()))
 		{
 			SFGameViewportClient->SwapCameraPosition();
+			SFGameViewportClient->SetSplitScreenType(ESFSplitScreenType::SeparateScreen);
 		}
 	}
 }
