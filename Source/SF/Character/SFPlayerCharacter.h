@@ -53,7 +53,7 @@ public:
 
 	void SetSideOption(FRotator TargetRotationRate);
 
-	void PlayAnimMontage(UAnimMontage* Montage);
+	void PlayMontage(UAnimMontage* Montage);
 
 protected:
 
@@ -102,7 +102,7 @@ protected:
 	void Server_SetSideOption(FRotator TargetRotationRate);
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void Multi_PlayAnimMontage(UAnimMontage* Montage);
+	void Multi_PlayMontage(UAnimMontage* Montage);
 
 	UFUNCTION(Server, Unreliable)
 	void Server_PlayAnimMontage(UAnimMontage* Montage);

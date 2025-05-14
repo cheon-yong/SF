@@ -166,11 +166,11 @@ void ASFPlayerCharacter::SetSideOption(FRotator TargetRotationRate)
 	Server_SetSideOption(TargetRotationRate);
 }
 
-void ASFPlayerCharacter::PlayAnimMontage(UAnimMontage* Montage)
+void ASFPlayerCharacter::PlayMontage(UAnimMontage* Montage)
 {
 	if (HasAuthority())
 	{
-		Multi_PlayAnimMontage(Montage);
+		Multi_PlayMontage(Montage);
 		return;
 	}
 
@@ -207,7 +207,7 @@ void ASFPlayerCharacter::Multi_SetSideOption_Implementation(FRotator TargetRotat
 	GetCapsuleComponent()->SetConstraintMode(EDOFMode::Type::XZPlane);
 }
 
-void ASFPlayerCharacter::Multi_PlayAnimMontage_Implementation(UAnimMontage* Montage)
+void ASFPlayerCharacter::Multi_PlayMontage_Implementation(UAnimMontage* Montage)
 {
 	GetMesh()->GetAnimInstance()->Montage_Play(Montage);
 }
