@@ -1,5 +1,4 @@
 Content/FantasyBundle/Maps/Demonstration_Village.umap filter=lfs diff=lfs merge=lfs -text
-Content/FantasyBundle/Maps/Demonstration_Castle.umap filter=lfs diff=lfs merge=lfs -text
 Content/ThirdPerson/Maps/TPSPuzzleMap.umap filter=lfs diff=lfs merge=lfs -text
 lfs/objects/14/61/14612ca4777fc446b8eb22acfc17926a80202957a3a1b196425be99227d8c59e filter=lfs diff=lfs merge=lfs -text
 lfs/objects/29/3f/293f2eb116ba6dc0f70c0791ce2898648729b7316a52a4079ba08650f1a4fee9 filter=lfs diff=lfs merge=lfs -text
