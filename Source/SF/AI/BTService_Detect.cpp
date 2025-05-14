@@ -8,6 +8,7 @@
 #include "Physics/SFCollision.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/OverlapResult.h"
+#include "Character/SFPlayerCharacter.h"
 #include "Character/SFNonPlayerCharacter.h"
 
 UBTService_Detect::UBTService_Detect()
@@ -56,8 +57,8 @@ void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	{
 		for (auto const& OverlapResult : OverlapResults)
 		{
-			APawn* Pawn = Cast<APawn>(OverlapResult.GetActor());
-			if (Pawn && Pawn->GetController()->IsPlayerController())
+			ASFPlayerCharacter* Pawn = Cast<ASFPlayerCharacter>(OverlapResult.GetActor());
+			if (Pawn)
 			{
 				NPC->Target = Pawn;
 				OwnerComp.GetBlackboardComponent()->SetValueAsObject(BBKEY_TARGET, Pawn);

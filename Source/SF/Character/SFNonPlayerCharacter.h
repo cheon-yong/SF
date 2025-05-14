@@ -30,10 +30,20 @@ public:
 	// TODO : 수정해야함 빠르게 하기에는 좋지만 확장성이 너무 떨어짐
 	virtual void SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished);
 	virtual void AttackByAI();
+
+	UFUNCTION(Server, Reliable)
+	void Server_AttackByAI();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_AttackByAI();
+
 	virtual void CreateProjectile();
 
 	virtual void OnDamage(uint8 Damage, AActor* InInstigator) override;
 	virtual void OnDeath() override;
+
+	UFUNCTION(NetMulticast,Reliable)
+	void Multi_OnDeath();
 
 protected:
 	// Called when the game starts or when spawned

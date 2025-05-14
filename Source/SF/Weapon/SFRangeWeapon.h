@@ -18,6 +18,8 @@ class SF_API ASFRangeWeapon : public ASFWeapon
 	GENERATED_BODY()
 	
 public:
+	ASFRangeWeapon();
+
 	virtual void Attack() override;
 
 	UPROPERTY(BlueprintAssignable)
@@ -29,4 +31,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Bullet)
 	FName SpawnSocketName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
+	TObjectPtr<UAudioComponent> AudioComponent;
 };

@@ -7,6 +7,13 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Character/SFPlayerCharacter.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Components/AudioComponent.h"
+
+ASFRangeWeapon::ASFRangeWeapon()
+{
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio"));
+	AudioComponent->SetupAttachment(MeshComp);
+}
 
 void ASFRangeWeapon::Attack()
 {

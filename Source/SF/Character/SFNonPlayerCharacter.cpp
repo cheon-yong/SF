@@ -24,6 +24,9 @@ ASFNonPlayerCharacter::ASFNonPlayerCharacter()
 		HpBar->SetDrawSize(FVector2D(500.0f, 500.0f));
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+
+	SetReplicates(true);
+	SetReplicateMovement(true);
 }
 
 // Called when the game starts or when spawned
@@ -68,6 +71,22 @@ void ASFNonPlayerCharacter::SetAIAttackDelegate(const FAICharacterAttackFinished
 }
 
 void ASFNonPlayerCharacter::AttackByAI()
+{
+	if (HasAuthority())
+	{
+		Multi_AttackByAI();
+		return;
+	}
+
+	Server_AttackByAI();
+}
+
+void ASFNonPlayerCharacter::Server_AttackByAI_Implementation()
+{
+	Multi_AttackByAI_Implementation();
+}
+
+void ASFNonPlayerCharacter::Multi_AttackByAI_Implementation()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	AnimInstance->Montage_Play(AttackMontage);
@@ -120,6 +139,16 @@ void ASFNonPlayerCharacter::OnDeath()
 		}
 	}
 
+	if (HasAuthority())
+	{
+		Multi_OnDeath();
+	}
+
+	Super::OnDeath();
+}
+
+void ASFNonPlayerCharacter::Multi_OnDeath_Implementation()
+{
 	if (DeathEffectClass)
 	{
 		if (DeathEffect != nullptr)
@@ -136,6 +165,4 @@ void ASFNonPlayerCharacter::OnDeath()
 
 		DeathEffect->SetLifeSpan(0.8f);
 	}
-
-	Super::OnDeath();
 }
