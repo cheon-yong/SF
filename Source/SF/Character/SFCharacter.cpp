@@ -140,10 +140,12 @@ void ASFCharacter::OnRep_CurrentWeapon()
 
 void ASFCharacter::OnRep_MaxHp()
 {
+	OnHpChanged.Broadcast(CurrentHp, MaxHp);
 }
 
 void ASFCharacter::OnRep_Hp()
 {
+	OnHpChanged.Broadcast(CurrentHp, MaxHp);
 }
 
 void ASFCharacter::BeginPlay()
@@ -156,7 +158,6 @@ void ASFCharacter::BeginPlay()
 	OnHpZero.AddDynamic(this, &ThisClass::OnDeath);
 
 	OnSpawned.AddDynamic(this, &ThisClass::OnSpawn);
-
 }
 
 void ASFCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

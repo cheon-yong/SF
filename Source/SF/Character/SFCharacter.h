@@ -183,10 +183,10 @@ protected:
 	void OnRep_CurrentWeapon();
 
 	UFUNCTION()
-	void OnRep_MaxHp();
+	virtual void OnRep_MaxHp();
 
 	UFUNCTION()
-	void OnRep_Hp();
+	virtual void OnRep_Hp();
 
 	// End OnRep
 

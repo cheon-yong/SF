@@ -73,8 +73,8 @@ protected:
 	TObjectPtr<USFAnimInstance_Copy> AvartarAnim;
 	
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
-	bool bFutureTheme = true;
+	bool bVillage = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	FVector Offset;
 };

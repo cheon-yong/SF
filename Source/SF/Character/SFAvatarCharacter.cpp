@@ -71,7 +71,7 @@ void ASFAvatarCharacter::OnRep_TargetCharacter()
 
 FVector ASFAvatarCharacter::GetPlayerThemeOffset() const
 {
-	if (bFutureTheme)
+	if (bVillage)
 	{
 		return Offset;
 	}
@@ -86,5 +86,6 @@ void ASFAvatarCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, TargetCharacter);
-	DOREPLIFETIME(ThisClass, bFutureTheme);
+	DOREPLIFETIME(ThisClass, bVillage);
+	DOREPLIFETIME(ThisClass, Offset);
 }
