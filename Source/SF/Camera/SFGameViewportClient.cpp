@@ -51,6 +51,7 @@ void USFGameViewportClient::SwapCameraPosition()
 {
 	SFSplitscreenInfo[ESFSplitScreenType::SeparateScreen].PlayerData.Swap(0, 1);
 	SFSplitscreenInfo[ESFSplitScreenType::OneScreen].PlayerData.Swap(0, 1);
+	SFSplitscreenInfo[ESFSplitScreenType::OffsetScreen].PlayerData.Swap(0, 1);
 }
 
 void USFGameViewportClient::SetSplitScreenType(ESFSplitScreenType NewSplitScreenType)
