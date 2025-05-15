@@ -62,6 +62,8 @@ protected:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	void CopyMontage(UAnimMontage* CopyMontage);
+
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_TargetCharacter, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<ASFPlayerCharacter> TargetCharacter;

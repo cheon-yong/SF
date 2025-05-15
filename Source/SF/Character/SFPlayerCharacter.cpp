@@ -129,6 +129,36 @@ void ASFPlayerCharacter::Interact_Internal()
 	PrimaryActor->BeginInteract(this);
 }
 
+void ASFPlayerCharacter::Dash_Internal(UAnimMontage* DashMontage, TSubclassOf<AEffectActor> DashEffectClass)
+{
+	FVector Forward = GetActorForwardVector();
+	FVector LaunchDirection = Forward;
+	LaunchDirection.Z = 0.2f;
+
+	FVector LaunchVelocity = LaunchDirection * 1500.0f;
+
+	PlayMontage(DashMontage);
+
+	if (DashEffectClass)
+	{
+		FActorSpawnParameters SpawnParams;
+		AEffectActor* DashEffect = GetWorld()->SpawnActor<AEffectActor>(DashEffectClass,
+			GetMesh()->GetComponentLocation(),
+			GetActorRotation(),
+			SpawnParams
+		);
+
+		DashEffect->Burst(this);
+	}
+
+	LaunchCharacter(LaunchVelocity, true, true);
+}
+
+void ASFPlayerCharacter::Server_Dash_Implementation(UAnimMontage* DashMontage, TSubclassOf<AEffectActor> DashEffectClass)
+{
+	Dash_Internal(DashMontage, DashEffectClass);
+}
+
 void ASFPlayerCharacter::WallJump(UAnimMontage* WallJumpMontage)
 {
 	if (HasAuthority())
@@ -171,10 +201,11 @@ void ASFPlayerCharacter::PlayMontage(UAnimMontage* Montage)
 	if (HasAuthority())
 	{
 		Multi_PlayMontage(Montage);
-		return;
 	}
-
-	Server_PlayAnimMontage(Montage);
+	else
+	{
+		Server_PlayMontage(Montage);
+	}
 }
 
 void ASFPlayerCharacter::WallJump_Internal(UAnimMontage* WallJumpMontage)
@@ -185,7 +216,7 @@ void ASFPlayerCharacter::WallJump_Internal(UAnimMontage* WallJumpMontage)
 
 	FVector LaunchVelocity = LaunchDirection * 600.0f; // 속도 조절
 
-	PlayAnimMontage(WallJumpMontage);
+	PlayMontage(WallJumpMontage);
 
 	LaunchCharacter(LaunchVelocity, true, true);
 }
@@ -210,11 +241,12 @@ void ASFPlayerCharacter::Multi_SetSideOption_Implementation(FRotator TargetRotat
 void ASFPlayerCharacter::Multi_PlayMontage_Implementation(UAnimMontage* Montage)
 {
 	GetMesh()->GetAnimInstance()->Montage_Play(Montage);
+	OnPlayMontage.Broadcast(Montage);
 }
 
-void ASFPlayerCharacter::Server_PlayAnimMontage_Implementation(UAnimMontage* Montage)
+void ASFPlayerCharacter::Server_PlayMontage_Implementation(UAnimMontage* Montage)
 {
-	PlayAnimMontage(Montage);
+	Multi_PlayMontage(Montage);
 }
 
 void ASFPlayerCharacter::Server_SetSideOption_Implementation(FRotator TargetRotationRate)
@@ -225,25 +257,6 @@ void ASFPlayerCharacter::Server_SetSideOption_Implementation(FRotator TargetRota
 void ASFPlayerCharacter::Server_WallJump_Implementation(UAnimMontage* WallJumpMontage)
 {
 	WallJump_Internal(WallJumpMontage);
-}
-
-void ASFPlayerCharacter::LogCameraState()
-{
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
-	{
-		if (PC->PlayerCameraManager)
-		{
-			const FMinimalViewInfo& POV = PC->PlayerCameraManager->GetCameraCachePOV();
-
-			UE_LOG(LogTemp, Warning, TEXT("=== Camera State ==="));
-			UE_LOG(LogTemp, Warning, TEXT("Name: %s"), *GetName());
-			UE_LOG(LogTemp, Warning, TEXT("Location: %s"), *POV.Location.ToString());
-			UE_LOG(LogTemp, Warning, TEXT("Rotation: %s"), *POV.Rotation.ToString());
-			UE_LOG(LogTemp, Warning, TEXT("FOV: %f"), POV.FOV);
-			UE_LOG(LogTemp, Warning, TEXT("AspectRatio: %f"), POV.AspectRatio);
-			UE_LOG(LogTemp, Warning, TEXT("BlendWeight: %f"), POV.PostProcessBlendWeight);
-		}
-	}
 }
 
 void ASFPlayerCharacter::Server_Interact_Implementation()
@@ -257,6 +270,17 @@ TArray<AActor*> ASFPlayerCharacter::GetInteractActors()
 	InteractBox->GetOverlappingActors(OverlappingActors);
 
 	return OverlappingActors;
+}
+
+void ASFPlayerCharacter::Dash(UAnimMontage* DashMontage, TSubclassOf<AEffectActor> DashEffectClass)
+{
+	if (HasAuthority())
+	{
+		Dash_Internal(DashMontage, DashEffectClass);
+		return;
+	}
+
+	Server_Dash(DashMontage, DashEffectClass);
 }
 
 void ASFPlayerCharacter::BeginPlay()
@@ -275,7 +299,6 @@ void ASFPlayerCharacter::BeginPlay()
 
 void ASFPlayerCharacter::SetColor()
 {
-
 	if (GetNetMode() == ENetMode::NM_ListenServer)
 	{
 		if (IsLocallyControlled())

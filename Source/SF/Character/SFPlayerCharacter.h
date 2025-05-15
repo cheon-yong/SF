@@ -8,6 +8,8 @@
 class UBoxComponent;
 class UPhysicsHandleComponent;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayMontage, UAnimMontage*);
+
 /**
  * 
  */
@@ -47,6 +49,9 @@ public:
 
 	TArray<AActor*> GetInteractActors();
 
+	UFUNCTION(BlueprintCallable)
+	void Dash(UAnimMontage* DashMontage, TSubclassOf<AEffectActor> DashEffectClass);
+
 	void WallJump(UAnimMontage* WallJumpMontage);
 
 	void ResetOption();
@@ -54,6 +59,8 @@ public:
 	void SetSideOption(FRotator TargetRotationRate);
 
 	void PlayMontage(UAnimMontage* Montage);
+
+	FOnPlayMontage OnPlayMontage;
 
 protected:
 
@@ -81,6 +88,11 @@ protected:
 
 	void Interact_Internal();
 
+	void Dash_Internal(UAnimMontage* DashMontage, TSubclassOf<AEffectActor> DashEffectClass);
+
+	UFUNCTION(Server, Unreliable)
+	void Server_Dash(UAnimMontage* DashMontage, TSubclassOf<AEffectActor> DashEffectClass);
+
 	UFUNCTION(Server, Unreliable)
 	void Server_Interact();
 
@@ -105,7 +117,7 @@ protected:
 	void Multi_PlayMontage(UAnimMontage* Montage);
 
 	UFUNCTION(Server, Unreliable)
-	void Server_PlayAnimMontage(UAnimMontage* Montage);
+	void Server_PlayMontage(UAnimMontage* Montage);
 
 public:
 	UPROPERTY(ReplicatedUsing = OnRep_Pitch, VisibleAnywhere, BlueprintReadOnly)
@@ -113,16 +125,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector ToMouseVector;
-
-
-	// Debug
-	// MyPlayerController.h 또는 원하는 클래스에 추가
-	FTimerHandle CameraDebugTimerHandle;
-
-	UFUNCTION()
-	void LogCameraState();
-	// ~ Debug
-
 
 protected:
 

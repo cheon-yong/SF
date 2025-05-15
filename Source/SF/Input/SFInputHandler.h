@@ -15,7 +15,8 @@ UENUM(BlueprintType)
 enum class EControlType : uint8
 {
 	ThirdPerson UMETA(DisplayName = "ThirdPerson"),
-	SideScroll	UMETA(DisplayName = "SideScroll")
+	SideScroll	UMETA(DisplayName = "SideScroll"),
+	AutoRunning	UMETA(DisplayName = "AutoRunning")
 };
 
 /**

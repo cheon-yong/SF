@@ -27,6 +27,8 @@ void ASFAvatarCharacter::SetTarget(ASFPlayerCharacter* InTargetCharacter)
 
 	SetTargetAnimInstance();
 	SetColor();
+
+	TargetCharacter->OnPlayMontage.AddUObject(this, &ThisClass::PlayMontage);
 }
 
 void ASFAvatarCharacter::SetTargetAnimInstance()
