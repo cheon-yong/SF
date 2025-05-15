@@ -156,7 +156,6 @@ void ASFCharacter::BeginPlay()
 	GetMesh()->SetAnimInstanceClass(DefaultAnimationClass);
 
 	OnHpZero.AddDynamic(this, &ThisClass::OnDeath);
-
 	OnSpawned.AddDynamic(this, &ThisClass::OnSpawn);
 }
 

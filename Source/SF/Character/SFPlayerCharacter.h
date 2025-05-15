@@ -37,7 +37,6 @@ public:
 
 	void Interact();
 
-
 	UFUNCTION(BlueprintCallable)
 	void PlayAnimMontageAndBlockMove(UAnimMontage* MontageToPlay, float PlayRate = 1.0f, FVector StartingPosition = FVector(0.f, 0.f, 0.f), FString StartingSection = TEXT("None"));
 
@@ -60,9 +59,16 @@ public:
 
 	void PlayMontage(UAnimMontage* Montage);
 
+	void UpdateRespawn(FVector Offset);
+
 	FOnPlayMontage OnPlayMontage;
 
 protected:
+
+	void UpdateRespawn_Internal(FVector Offset);
+
+	UFUNCTION(Server, Unreliable)
+	void Server_UpdateRespawn(FVector Offset);
 
 	// To add mapping context
 	virtual void BeginPlay() override;
@@ -77,6 +83,12 @@ protected:
 	virtual void OnSpawn() override;
 
 	virtual void OnDeath() override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_OnDeath();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_OnSpawn();
 
 	UFUNCTION()
 	void OnInteractBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

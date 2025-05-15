@@ -3,8 +3,6 @@
 
 #include "Player/SFLocalPlayer.h"
 
-#include "IXRTrackingSystem.h"
-#include "IXRCamera.h"
 #include "Camera/CameraComponent.h"
 #include "Camera/SFGameViewportClient.h"
 #include "SceneView.h"
@@ -29,17 +27,6 @@ bool USFLocalPlayer::CalcSceneViewInitOptions(
 		return false;
 	}
 
-	//// 전체 Viewport 크기
-	//const FIntPoint FullSize = Viewport->GetSizeXY();
-	//const int32 FullWidth = FullSize.X;
-	//const int32 FullHeight = FullSize.Y;
-
-	//ViewInitOptions.SetViewRectangle(FIntRect(0, 0, FullWidth / 2, FullHeight));
-
-	//const APlayerController* PC = GetPlayerController(GetWorld());
-	//const FMinimalViewInfo& POV = PC->PlayerCameraManager->GetCameraCacheView();
-
-	//float AspectRatio = (float)FullWidth / (float)FullHeight;
 	if (USFGameViewportClient* SFViewport = Cast< USFGameViewportClient>(GetWorld()->GetGameViewport()))
 	{
 		if (SFViewport->GetScreenType() == ESFSplitScreenType::OffsetScreen)
@@ -47,27 +34,31 @@ bool USFLocalPlayer::CalcSceneViewInitOptions(
 			if (ASFPlayerController* SFPC = Cast<ASFPlayerController>(GetPlayerController(GetWorld())))
 			{
 				float OffsetX = SFViewport->GetOffsetX();
+				float ElapsedTime = SFViewport->GetElapedTime();
+				float ChangeDuration = SFViewport->GetChangeDuration();
+
+				float Alpha = FMath::Clamp(ElapsedTime / ChangeDuration, 0.f, OffsetX);
 
 				if (GetWorld()->GetNetMode() == ENetMode::NM_Client)
 				{
 					if (SFPC->bMainController == true)
 					{
-						ViewInitOptions.ProjectionMatrix.M[2][0] -= OffsetX;
+						ViewInitOptions.ProjectionMatrix.M[2][0] -= Alpha;
 					}
 					else
 					{
-						ViewInitOptions.ProjectionMatrix.M[2][0] += OffsetX;
+						ViewInitOptions.ProjectionMatrix.M[2][0] += Alpha;
 					}
 				}
 				else
 				{
 					if (SFPC->bMainController == true)
 					{
-						ViewInitOptions.ProjectionMatrix.M[2][0] += OffsetX;
+						ViewInitOptions.ProjectionMatrix.M[2][0] += Alpha;
 					}
 					else
 					{
-						ViewInitOptions.ProjectionMatrix.M[2][0] -= OffsetX;
+						ViewInitOptions.ProjectionMatrix.M[2][0] -= Alpha;
 					}
 				}
 			}
@@ -83,9 +74,4 @@ FSceneView* USFLocalPlayer::CalcSceneView(FSceneViewFamily* ViewFamily, FVector&
 
 
 	return OriginView;
-}
-
-bool USFLocalPlayer::GetProjectionData(FViewport* Viewport, FSceneViewProjectionData& ProjectionData, int32 StereoViewIndex) const
-{
-	return Super::GetProjectionData(Viewport, ProjectionData, StereoViewIndex);
 }

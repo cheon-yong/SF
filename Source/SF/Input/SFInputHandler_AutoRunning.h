@@ -28,6 +28,9 @@ public:
 protected:
 	void Move(const FInputActionValue& Value);
 
+	void Speed(const FInputActionValue& Value);
+	void SpeedEnd(const FInputActionValue& Value);
+
 	void Jump();
 
 	void Dash();
@@ -35,6 +38,8 @@ protected:
 	void StopJumping();
 
 	void MoveForward();
+
+	void UpdateRespawn();
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Dash)
@@ -49,6 +54,12 @@ public:
 	UPROPERTY(Transient)
 	float LastDashTime = -FLT_MAX;
 
+	UPROPERTY(Transient)
+	float SpeedRate = 0.7f;
+
+	UPROPERTY(Transient)
+	FVector RespawnOffset = FVector(-500, 0, 0);
+
 	/** Jump Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* JumpAction;
@@ -56,6 +67,9 @@ public:
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SpeedAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* DashAction;

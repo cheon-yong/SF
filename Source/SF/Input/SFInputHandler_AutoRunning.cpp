@@ -22,11 +22,14 @@ void USFInputHandler_AutoRunning::Bind(ASFPlayerController* PlayerController, UE
 
 	// Dash
 	EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &USFInputHandler_AutoRunning::Dash);
+
+	// Speed
+	EnhancedInputComponent->BindAction(SpeedAction, ETriggerEvent::Started, this, &USFInputHandler_AutoRunning::Speed);
+	EnhancedInputComponent->BindAction(SpeedAction, ETriggerEvent::Completed, this, &USFInputHandler_AutoRunning::SpeedEnd);
 }
 
 void USFInputHandler_AutoRunning::Unbind()
 {
-
 	Super::Unbind();
 }
 
@@ -36,6 +39,8 @@ void USFInputHandler_AutoRunning::Tick(float DeltaSeconds)
 	{
 		MoveForward();
 	}
+
+	//UpdateRespawn();
 }
 
 void USFInputHandler_AutoRunning::Move(const FInputActionValue& Value)
@@ -47,6 +52,25 @@ void USFInputHandler_AutoRunning::Move(const FInputActionValue& Value)
 		// add movement 
 		ControlledPawn->AddMovementInput(FVector::RightVector, Direction);
 	}
+}
+
+void USFInputHandler_AutoRunning::Speed(const FInputActionValue& Value)
+{
+	float Direction = Value.Get<float>();
+
+	if (Direction > 0)
+	{
+		SpeedRate = 1.0f;
+	}
+	else
+	{
+		SpeedRate = 0.3f;
+	}
+}
+
+void USFInputHandler_AutoRunning::SpeedEnd(const FInputActionValue& Value)
+{
+	SpeedRate = 1.0f;
 }
 
 void USFInputHandler_AutoRunning::Jump()
@@ -82,7 +106,16 @@ void USFInputHandler_AutoRunning::MoveForward()
 {
 	if (APawn* ControlledPawn = GetPawn())
 	{
+		FVector Direction = FVector::ForwardVector * SpeedRate;
 		// add movement 
-		ControlledPawn->AddMovementInput(FVector::ForwardVector, -1.0f);
+		ControlledPawn->AddMovementInput(Direction, -1.0f);
+	}
+}
+
+void USFInputHandler_AutoRunning::UpdateRespawn()
+{
+	if (ASFPlayerCharacter* ControlledCharacter = Cast<ASFPlayerCharacter>(GetCharacter()))
+	{
+		ControlledCharacter->UpdateRespawn(RespawnOffset);
 	}
 }

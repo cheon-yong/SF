@@ -50,6 +50,8 @@ public:
 	void Client_ShowMouseCurser(bool bShow);
 
 protected:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	void BindInputHandler(USFInputHandler* InputHandler);
 
 	UFUNCTION()
@@ -62,7 +64,7 @@ protected:
 	void Server_Respawn();
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	FVector RespawnLocation = FVector::Zero();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))

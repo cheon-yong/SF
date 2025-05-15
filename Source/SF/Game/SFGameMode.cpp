@@ -37,10 +37,7 @@ void ASFGameMode::PostLogin(APlayerController* NewPlayer)
 		if (GameInstance->GetNumLocalPlayers() < 2)
 		{
 			FString Error;
-			//SFGameInstance->CreateLocalPlayer(NewPlayer, Error);
-			//SFGameInstance->CreateLocalPlayer(NewPlayer->PlayerCameraManager, Error);
 			int32 NewId = GameInstance->GetLocalPlayerByIndex(0)->GetControllerId() + 1;
-
 			ULocalPlayer* EmptyLocalPlayer = GameInstance->CreateLocalPlayer(NewId, Error, true);
 			if (ASFPlayerController* SFPC = Cast<ASFPlayerController>(EmptyLocalPlayer->GetPlayerController(GetWorld())))
 			{

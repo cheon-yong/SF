@@ -5,11 +5,10 @@
 #include "Engine/LocalPlayer.h"
 #include "SFLocalPlayer.generated.h"
 
-class APlayerCameraManager;
-
 /**
  * 
  */
+
 UCLASS()
 class SF_API USFLocalPlayer : public ULocalPlayer
 {
@@ -31,7 +30,5 @@ public:
 		FViewport* Viewport,
 		class FViewElementDrawer* ViewDrawer = NULL,
 		int32 StereoViewIndex = INDEX_NONE) override;
-protected:
-	virtual bool GetProjectionData(FViewport* Viewport, FSceneViewProjectionData& ProjectionData, int32 StereoViewIndex = INDEX_NONE) const override;
 
 };

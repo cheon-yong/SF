@@ -15,6 +15,7 @@
 #include "Components/BoxComponent.h"
 #include "Actor/InteractActor.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
+#include <Player/SFPlayerController.h>
 
 
 ASFPlayerCharacter::ASFPlayerCharacter() 
@@ -208,6 +209,16 @@ void ASFPlayerCharacter::PlayMontage(UAnimMontage* Montage)
 	}
 }
 
+void ASFPlayerCharacter::UpdateRespawn(FVector Offset)
+{
+	if (HasAuthority())
+	{
+		UpdateRespawn_Internal(Offset);
+	}
+
+	Server_UpdateRespawn(Offset);
+}
+
 void ASFPlayerCharacter::WallJump_Internal(UAnimMontage* WallJumpMontage)
 {
 	FVector Forward = GetActorForwardVector();
@@ -283,6 +294,19 @@ void ASFPlayerCharacter::Dash(UAnimMontage* DashMontage, TSubclassOf<AEffectActo
 	Server_Dash(DashMontage, DashEffectClass);
 }
 
+void ASFPlayerCharacter::UpdateRespawn_Internal(FVector Offset)
+{
+	if (ASFPlayerController* SFPC = Cast<ASFPlayerController>(GetController()))
+	{
+		SFPC->RespawnLocation = SFPC->GetViewTarget()->GetActorLocation() + FVector(-500, 0, 0);
+	}
+}
+
+void ASFPlayerCharacter::Server_UpdateRespawn_Implementation(FVector Offset)
+{
+	UpdateRespawn_Internal(Offset);
+}
+
 void ASFPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -299,7 +323,7 @@ void ASFPlayerCharacter::BeginPlay()
 
 void ASFPlayerCharacter::SetColor()
 {
-	if (GetNetMode() == ENetMode::NM_ListenServer)
+	if (HasAuthority())
 	{
 		if (IsLocallyControlled())
 		{
@@ -350,6 +374,48 @@ void ASFPlayerCharacter::OnSpawn()
 {
 	Super::OnSpawn();
 
+	if (HasAuthority())
+	{
+		Multi_OnSpawn();
+	}
+}
+
+void ASFPlayerCharacter::OnDeath()
+{
+	if (HasAuthority())
+	{
+		Multi_OnDeath();
+	}
+	//Super::OnDeath();
+}
+
+void ASFPlayerCharacter::Multi_OnDeath_Implementation()
+{
+	if (DeathEffectClass)
+	{
+		FActorSpawnParameters SpawnParams;
+		if (DeathEffect != nullptr)
+		{
+			DeathEffect->Destroy();
+			DeathEffect = nullptr;
+		}
+		DeathEffect = GetWorld()->SpawnActor<AActor>(DeathEffectClass,
+			GetMesh()->GetComponentLocation(),
+			GetActorRotation(),
+			SpawnParams
+		);
+
+		//DeathEffect->SetLifeSpan(0.8f);
+
+		if (AEffectActor* DEA = Cast<AEffectActor>(DeathEffect))
+		{
+			DEA->Burst(this);
+		}
+	}
+}
+
+void ASFPlayerCharacter::Multi_OnSpawn_Implementation()
+{
 	if (SpawnEffectClass)
 	{
 		if (DeathEffect)
@@ -376,36 +442,6 @@ void ASFPlayerCharacter::OnSpawn()
 			SEA->Burst(this);
 		}
 	}
-}
-
-void ASFPlayerCharacter::OnDeath()
-{
-	if (HasAuthority() == false)
-		return;
-
-	if (DeathEffectClass)
-	{
-		FActorSpawnParameters SpawnParams;
-		if (DeathEffect != nullptr)
-		{
-			DeathEffect->Destroy();
-			DeathEffect = nullptr;
-		}
-		DeathEffect = GetWorld()->SpawnActor<AActor>(DeathEffectClass,
-			GetMesh()->GetComponentLocation(),
-			GetActorRotation(),
-			SpawnParams
-		);
-
-		//DeathEffect->SetLifeSpan(0.8f);
-
-		if (AEffectActor* DEA = Cast<AEffectActor>(DeathEffect))
-		{
-			DEA->Burst(this);
-		}
-	}
-
-	//Super::OnDeath();
 }
 
 void ASFPlayerCharacter::OnInteractBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

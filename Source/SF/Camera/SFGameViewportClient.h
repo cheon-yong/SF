@@ -36,6 +36,10 @@ public:
 	
 	virtual void SwapCameraPosition();
 
+	float GetElapedTime() { return ElapsedTime; }
+
+	float GetChangeDuration() { return ChangeDuration; }
+
 	float GetOffsetX() { return OffsetX; }
 
 	ESFSplitScreenType GetScreenType() { return SplitscreenType; }
@@ -46,8 +50,6 @@ protected:
 	void UpdateScreenInfo(float DeltaTime);
 
 protected:
-
-	
 	float ElapsedTime;
 
 	float ChangeDuration;

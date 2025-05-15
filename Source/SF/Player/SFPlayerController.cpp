@@ -15,13 +15,13 @@
 #include <EnhancedInputComponent.h>
 #include <Character/SFPlayerCharacter.h>
 #include "EngineUtils.h"
+#include <Net/UnrealNetwork.h>
 
 
 ASFPlayerController::ASFPlayerController()
 {
 	DefaultType = EControlType::ThirdPerson;
 }
-
 
 void ASFPlayerController::OnRep_PlayerState()
 {
@@ -82,7 +82,7 @@ void ASFPlayerController::OnPossess(APawn* InPawn)
 
 	if (ASFPlayerCharacter* PlayerCharacter = Cast<ASFPlayerCharacter>(InPawn))
 	{
-		PlayerCharacter->OnHpZero.AddDynamic(this, &ThisClass::OnCharacterDeath);
+		PlayerCharacter->OnHpZero.AddDynamic(this, &ASFPlayerController::OnCharacterDeath);
 	}
 }
 
@@ -124,6 +124,13 @@ void ASFPlayerController::Multicast_ChangeControlType_Implementation(EControlTyp
 void ASFPlayerController::Client_ShowMouseCurser_Implementation(bool bShow)
 {
 	SetShowMouseCursor(bShow);
+}
+
+void ASFPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, RespawnLocation);
 }
 
 void ASFPlayerController::BindInputHandler(USFInputHandler* InputHandler)
@@ -223,7 +230,6 @@ void ASFPlayerController::Client_UpdateSecondController_Implementation()
 	}
 }
 
-
 void ASFPlayerController::Server_DeleteSecondPawn_Implementation()
 {
 	AActor* NewViewTarget = nullptr;
@@ -233,6 +239,7 @@ void ASFPlayerController::Server_DeleteSecondPawn_Implementation()
 		if (PC->IsLocalController() && NewViewTarget == nullptr)
 		{
 			NewViewTarget = PC->GetViewTarget();
+			//NewViewTarget = PC->GetPawn();
 			continue;
 		}
 		
