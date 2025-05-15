@@ -12,31 +12,8 @@
 #include "Player/SFPlayerController.h"
 #include <Engine/DebugCameraController.h>
 
-#if !UE_BUILD_SHIPPING
-
-static TAutoConsoleVariable<int32> CVarViewportTest(
-	TEXT("r.Test.ConstrainedView"),
-	0,
-	TEXT("Allows to test different viewport rectangle configuations (in game only) as they can happen when using cinematics/Editor.\n")
-	TEXT("0: off(default)\n")
-	TEXT("1..7: Various Configuations"),
-	ECVF_RenderThreadSafe);
-
-#endif // !UE_BUILD_SHIPPING
-
-int32 GCalcLocalPlayerCachedLODDistanceFactor = 1;
-static FAutoConsoleVariableRef CVarCalcLocalPlayerCachedLODDistanceFactor(
-	TEXT("r.CalcLocalPlayerCachedLODDistanceFactor"),
-	GCalcLocalPlayerCachedLODDistanceFactor,
-	TEXT("Should we calculate a LOD Distance Factor based on the current FOV.  Should not be necessary since LOD is already based on screen size.\n")
-);
-
-DECLARE_CYCLE_STAT(TEXT("CalcSceneView"), STAT_CalcSceneView, STATGROUP_Engine);
-
-
 USFLocalPlayer::USFLocalPlayer()
 {
-	LocalPlayerCachedLODDistanceFactor = 1.0f;
 }
 
 bool USFLocalPlayer::CalcSceneViewInitOptions(
@@ -63,7 +40,6 @@ bool USFLocalPlayer::CalcSceneViewInitOptions(
 	//const FMinimalViewInfo& POV = PC->PlayerCameraManager->GetCameraCacheView();
 
 	//float AspectRatio = (float)FullWidth / (float)FullHeight;
-
 	if (USFGameViewportClient* SFViewport = Cast< USFGameViewportClient>(GetWorld()->GetGameViewport()))
 	{
 		if (SFViewport->GetScreenType() == ESFSplitScreenType::OffsetScreen)
@@ -71,13 +47,28 @@ bool USFLocalPlayer::CalcSceneViewInitOptions(
 			if (ASFPlayerController* SFPC = Cast<ASFPlayerController>(GetPlayerController(GetWorld())))
 			{
 				float OffsetX = SFViewport->GetOffsetX();
-				if (SFPC->bMainController == true)
+
+				if (GetWorld()->GetNetMode() == ENetMode::NM_Client)
 				{
-					ViewInitOptions.ProjectionMatrix.M[2][0] += OffsetX;
+					if (SFPC->bMainController == true)
+					{
+						ViewInitOptions.ProjectionMatrix.M[2][0] -= OffsetX;
+					}
+					else
+					{
+						ViewInitOptions.ProjectionMatrix.M[2][0] += OffsetX;
+					}
 				}
 				else
 				{
-					ViewInitOptions.ProjectionMatrix.M[2][0] -= OffsetX;
+					if (SFPC->bMainController == true)
+					{
+						ViewInitOptions.ProjectionMatrix.M[2][0] += OffsetX;
+					}
+					else
+					{
+						ViewInitOptions.ProjectionMatrix.M[2][0] -= OffsetX;
+					}
 				}
 			}
 		}

@@ -34,12 +34,4 @@ public:
 protected:
 	virtual bool GetProjectionData(FViewport* Viewport, FSceneViewProjectionData& ProjectionData, int32 StereoViewIndex = INDEX_NONE) const override;
 
-protected:
-	mutable float LocalPlayerCachedLODDistanceFactor;
-
-public:
-
-	
-
-	TObjectPtr<APlayerCameraManager> PlayerCameraManager;
 };
