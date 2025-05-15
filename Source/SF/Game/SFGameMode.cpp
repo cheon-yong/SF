@@ -7,6 +7,8 @@
 #include "Player/SFPlayerController.h"
 #include "Game/SFGameInstance.h"
 #include "Camera/ViewportBlueprintFunctionLibrary.h"
+#include <Kismet/GameplayStatics.h>
+#include "GameFramework/PlayerStart.h"
 
 ASFGameMode::ASFGameMode()
 {
@@ -51,5 +53,26 @@ void ASFGameMode::PostLogin(APlayerController* NewPlayer)
 			}
 		}
 	}
+}
+
+AActor* ASFGameMode::ChoosePlayerStart_Implementation(AController* Player)
+{
+	TArray<AActor*> PlayerStarts;
+	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
+
+	for (AActor* Start : PlayerStarts)
+	{
+		if (Start->ActorHasTag("ServerStart") && Player->IsLocalController())
+		{
+			return Start;
+		}
+		else if (Start->ActorHasTag("ClientStart") && !Player->IsLocalController())
+		{
+			return Start;
+		}
+	}
+
+	// fallback
+	return Super::ChoosePlayerStart_Implementation(Player);
 }
 
